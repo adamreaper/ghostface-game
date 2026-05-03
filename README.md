@@ -31,7 +31,7 @@ On another device, replace `127.0.0.1` with this machine's LAN IP.
 
 ## Prototype Loop
 
-Collect all phones while avoiding the hunters. Every cleared level immediately rolls into a harder one with more phones, faster enemies, and additional hunters. Slashing can damage and briefly stun hunters; dash gives a short invulnerability window. If you die, the run restarts completely from level 1 so the game can be played infinitely.
+Collect all phones while avoiding the hunters. Every cleared level immediately rolls into a harder one with more phones, faster enemies, and additional hunters. Slashing can damage, defeat, and briefly stun hunters; defeated hunters increment the HUD counter and respawn after a short delay. Dash gives a short invulnerability window. If you die, the run restarts completely from level 1 so the game can be played infinitely.
 
 ## Files
 

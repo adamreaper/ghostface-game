@@ -56,7 +56,7 @@
     </div>
     <div class="hud-card" id="score">
       <div class="brand">LEVEL <span id="level">1</span> · <span id="found">0</span>/<span id="total">5</span> PHONES</div>
-      <div class="sub">Time <span id="timer">00:00</span> · Combo <span id="combo">0</span> · Enemies <span id="enemyCount">1</span></div>
+      <div class="sub">Time <span id="timer">00:00</span> · Combo <span id="combo">0</span> · Enemies <span id="enemyCount">1</span> · Defeated <span id="defeatedCount">0</span></div>
     </div>
   </div>
   <div class="controls">
@@ -87,11 +87,12 @@
   let gameOverTimer = 0;
   let level = 1;
   let levelClearTimer = 0;
+  let defeatedEnemies = 0;
 
   const UI = {
     hp: document.getElementById('hpBar'), found: document.getElementById('found'), total: document.getElementById('total'),
     timer: document.getElementById('timer'), combo: document.getElementById('combo'), status: document.getElementById('status'), hint: document.getElementById('hint'),
-    level: document.getElementById('level'), enemyCount: document.getElementById('enemyCount')
+    level: document.getElementById('level'), enemyCount: document.getElementById('enemyCount'), defeatedCount: document.getElementById('defeatedCount')
   };
 
   const keys = new Set();
@@ -130,6 +131,7 @@
     level = 1;
     elapsed = 0;
     player.combo = 0;
+    defeatedEnemies = 0;
     initLevel(true);
   }
 
@@ -157,13 +159,20 @@
   function makeEnemy(i) {
     const pt = spawnPoint(i + 30, 120);
     const maxHp = 70 + level * 12;
-    return { x: pt.x, y: pt.y, r: 22, speed: 104 + level * 5 + i * 4, maxHp, hp: maxHp, facing: pt.x < player.x ? 1 : -1, state: 'stalk', frame: 0, animT: i * .37, stun: 0, atk: 0, dead: false, hitFlash: 0 };
+    return { id: i, x: pt.x, y: pt.y, r: 22, speed: 104 + level * 5 + i * 4, maxHp, hp: maxHp, facing: pt.x < player.x ? 1 : -1, state: 'stalk', frame: 0, animT: i * .37, stun: 0, atk: 0, dead: false, respawnTimer: 0, hitFlash: 0 };
+  }
+
+  function respawnEnemy(e) {
+    const pt = spawnPoint(e.id + 30 + defeatedEnemies * 3, 140);
+    const maxHp = 70 + level * 12;
+    Object.assign(e, { x: pt.x, y: pt.y, maxHp, hp: maxHp, speed: 104 + level * 5 + e.id * 4, facing: pt.x < player.x ? 1 : -1, state: 'stalk', frame: 0, animT: 0, stun: .35, atk: 0, dead: false, respawnTimer: 0, hitFlash: 0 });
+    burst(e.x, e.y, '#8be8ff', 16);
   }
 
   function spawnPoint(i, margin = 80) {
     const x = margin + ((i * 397 + level * 131) % Math.max(1, world.w - margin * 2));
     const y = margin + ((i * 223 + level * 179) % Math.max(1, world.h - margin * 2));
-    if (Math.hypot(x - player.x, y - player.y) < 180) return { x: world.w - x, y: world.h - y };
+    if (Math.hypot(x - player.x, y - player.y) < 260) return { x: world.w - x, y: world.h - y };
     return { x, y };
   }
 
@@ -265,7 +274,7 @@
 
   function updateEnemies(dt) {
     for (const e of enemies) {
-      if (e.dead) continue;
+      if (e.dead) { e.respawnTimer = Math.max(0, e.respawnTimer - dt); if (e.respawnTimer <= 0) respawnEnemy(e); continue; }
       e.stun = Math.max(0, e.stun - dt); e.atk = Math.max(0, e.atk - dt); e.hitFlash = Math.max(0, e.hitFlash - dt);
       const dx = player.x - e.x, dy = player.y - e.y, l = Math.hypot(dx,dy) || 1;
       const seen = l < 520 + level * 16;
@@ -279,7 +288,7 @@
       }
       if (player.atk > .12 && Math.abs(player.x + player.facing*36 - e.x) < 58 && Math.abs(player.y - e.y) < 50) {
         e.hp = Math.max(0, e.hp - 26); e.stun = .65; e.hitFlash = .18; shake = Math.max(shake, 7); burst(e.x, e.y, '#d92036', 9); player.combo++;
-        if (e.hp <= 0) { e.dead = true; burst(e.x, e.y, '#dfefff', 18); UI.status.textContent = 'Hunter down. Keep collecting.'; }
+        if (e.hp <= 0) { e.dead = true; e.respawnTimer = Math.max(2.2, 4.2 - level * .12); defeatedEnemies++; burst(e.x, e.y, '#dfefff', 18); UI.status.textContent = `Hunter defeated. Respawning in ${e.respawnTimer.toFixed(1)}s.`; }
       }
     }
   }
@@ -306,7 +315,7 @@
   function slashParticles(x,y,dir) { for(let i=0;i<16;i++) particles.push({x,y,vx:dir*(80+Math.random()*210),vy:-90+Math.random()*180,life:.18+Math.random()*.25,color:i%3?'#dfefff':'#d92036',size:2+Math.random()*3}); }
   function updateParticles(dt) { for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=180*dt; if(p.life<=0) particles.splice(i,1); } }
   function updateUI() {
-    UI.hp.style.width = player.hp + '%'; UI.found.textContent = phones.filter(p=>p.got).length; UI.combo.textContent = player.combo; UI.level.textContent = level; UI.enemyCount.textContent = enemies.filter(e=>!e.dead).length;
+    UI.hp.style.width = player.hp + '%'; UI.found.textContent = phones.filter(p=>p.got).length; UI.combo.textContent = player.combo; UI.level.textContent = level; UI.enemyCount.textContent = enemies.filter(e=>!e.dead).length; UI.defeatedCount.textContent = defeatedEnemies;
     const t = Math.floor(elapsed); UI.timer.textContent = String(Math.floor(t/60)).padStart(2,'0') + ':' + String(t%60).padStart(2,'0');
     if (phones.every(p=>p.got) && levelClearTimer > 0) UI.status.textContent = `Level ${level} clear! Next wave incoming...`;
   }
