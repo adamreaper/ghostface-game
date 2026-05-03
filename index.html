@@ -105,7 +105,7 @@
 
   const spriteAssets = {
     ghost: loadSprite('assets/modern-fit/ghostface_modern_fit_clean_v13_96x128.png', 96, 128, 4),
-    ghostAttack: loadSprite('assets/modern-fit/ghostface_modern_fit_attack_v14_96x128.png', 96, 128, 4),
+    ghostAttack: loadSprite('assets/modern-fit/ghostface_modern_fit_attack_v15_96x128.png', 96, 128, 4),
     guard: loadSprite('assets/detailed-transparent/guard_detailed_80x80.png', 80, 80, 4),
     phone: loadSprite('assets/detailed-transparent/phone_detailed_32x32.png', 32, 32, 3),
     wall: loadSprite('assets/detailed-transparent/wall_tiles_detailed_64x64.png', 64, 64, 4)
@@ -373,7 +373,41 @@
     if (isPlayer && e.inv > 0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=.45;
     drawSpriteLike(e.state, e.frame, isPlayer ? 1 : .94, isPlayer);
     ctx.restore();
-    if (isPlayer && e.atk > 0) { ctx.save(); ctx.translate(e.x + e.facing*34, e.y-4); ctx.scale(e.facing,1); const slashLife = clamp(e.atk / .42, 0, 1); ctx.globalAlpha = .35 + .55 * slashLife; ctx.strokeStyle='rgba(220,245,255,.9)'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(0,0,42,-.9,.78); ctx.stroke(); ctx.strokeStyle='rgba(217,32,54,.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(5,2,35,-.62,.62); ctx.stroke(); ctx.restore(); }
+    if (isPlayer && e.atk > 0) drawSlashEffect(e);
+  }
+  function drawSlashEffect(e) {
+    const progress = clamp(1 - e.atk / .42, 0, 1);
+    ctx.save();
+    ctx.translate(e.x + e.facing * 34, e.y - 7);
+    ctx.scale(e.facing, 1);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    if (progress < .22) {
+      // Wind-up cue: small bright blade glint behind/above the mask, like a Shovel Knight-style anticipation read.
+      const a = progress / .22;
+      ctx.globalAlpha = .35 + a * .35;
+      ctx.strokeStyle = 'rgba(220,245,255,.75)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(4, -34); ctx.lineTo(28, -53); ctx.stroke();
+    } else if (progress < .68) {
+      // Active frame: big external crescent carries the hit, closer to Mega Man Zero / Hyper Light readability.
+      const a = (progress - .22) / .46;
+      ctx.globalAlpha = .95;
+      ctx.strokeStyle='rgba(236,252,255,.95)'; ctx.lineWidth=8;
+      ctx.beginPath(); ctx.arc(2, 0, 46, -.95 + a*.18, .75 + a*.18); ctx.stroke();
+      ctx.strokeStyle='rgba(217,32,54,.92)'; ctx.lineWidth=4;
+      ctx.beginPath(); ctx.arc(7, 4, 37, -.72 + a*.14, .60 + a*.14); ctx.stroke();
+      ctx.globalAlpha = .45; ctx.strokeStyle='rgba(139,232,255,.9)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(-2, -2, 54, -.78, .52); ctx.stroke();
+    } else {
+      // Follow-through/recovery: slash fades and drops lower instead of snapping straight back to idle.
+      const a = 1 - (progress - .68) / .32;
+      ctx.globalAlpha = .25 + a * .45;
+      ctx.strokeStyle='rgba(220,245,255,.75)'; ctx.lineWidth=5;
+      ctx.beginPath(); ctx.arc(6, 8, 39, -.25, .82); ctx.stroke();
+      ctx.strokeStyle='rgba(217,32,54,.65)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(10, 12, 31, -.15, .70); ctx.stroke();
+    }
+    ctx.restore();
   }
   function drawEnemyHealthBar(e) {
     const pct = clamp(e.hp / e.maxHp, 0, 1);

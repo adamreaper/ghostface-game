@@ -158,7 +158,7 @@
     "Attack runtime intentionally reuses the cleaned full-body cells; the canvas renders slash arcs separately for mobile readability."
   ],
   "runtime_movement": "ghostface_modern_fit_clean_v13_96x128.png",
-  "runtime_attack": "ghostface_modern_fit_attack_v14_96x128.png",
+  "runtime_attack": "ghostface_modern_fit_attack_v15_96x128.png",
   "cache_bust_note": "v13 filenames force mobile browsers to load the phantom-cleaned atlas instead of cached old same-path PNGs.",
   "files": {
     "ghostface_modern_fit_clean_v13_96x128.png": {
@@ -185,7 +185,17 @@
       "frames": 4,
       "phantom_cleaned": true,
       "attack_distinct": true
+    },
+    "ghostface_modern_fit_attack_v15_96x128.png": {
+      "bytes": 8781,
+      "sha256": "1f9061d7bbf590e30ef4abdf49d1fa27298c4aab0e6421bc23beb25b7aa0e5ac",
+      "cell_width": 96,
+      "cell_height": 128,
+      "frames": 4,
+      "phantom_cleaned": true,
+      "attack_distinct": true,
+      "baked_slash_fx": false
     }
   },
-  "attack_animation_note": "v14 attack atlas is phantom-cleaned but visually distinct: lunge offsets, connected knife/arm poses, and pixel slash streaks per frame."
+  "attack_animation_note": "v15 uses a reference-style clean 4-frame attack pose sequence (wind-up, active lunge, follow-through, recovery) with no baked crescent clutter; the engine draws the large readable slash arc externally."
 }
