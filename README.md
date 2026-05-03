@@ -36,9 +36,14 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 ## Files
 
 - `index.html` — single-page game prototype using transparent pixel-art atlas assets
-- `assets/modern-fit/ghostface_modern_fit_clean_v13_96x128.png` — runtime player movement atlas remade from the preferred modern sheet, transparent RGBA, 4 frames, full head-to-toe body visible in 96×128 cells; versioned filename forces mobile browsers past cached phantom sprites
-- `assets/modern-fit/ghostface_modern_attack_fullsize_v19_96x128.png` — runtime player attack atlas rebuilt on top of the full-size approved movement atlas so slash never shrinks Ghostface; runtime stays atlas-only with no external procedural overlay
-- `assets/modern-fit/asset_manifest.json` — source, cell sizes, pivots, frame counts, and import notes for the runtime modern-fit player assets
+- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_idle_192x144.png` — runtime player idle atlas extracted only from Nate's uploaded 6×6 Ghostface sheet, transparent RGBA, 6 frames
+- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_walk_192x144.png` — runtime player walk atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames
+- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_run_192x144.png` — runtime player run atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames
+- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_attack_192x144.png` — runtime player slash atlas extracted only from Nate's uploaded sheet row 4, transparent RGBA, 6 frames with baked sheet slash poses/effects; no procedural slash particles are used
+- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_hurt_death_192x144.png` — runtime player hurt/death atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames
+- `assets/uploaded-ghostface-v20/source_uploaded_ghostface_sheet.jpeg` — Nate's uploaded source sheet used for every runtime player Ghostface frame
+- `assets/uploaded-ghostface-v20/asset_manifest.json` — source, grid, cell sizes, pivots, frame metadata, and import notes for the uploaded-sheet-only runtime player assets
+- `scripts/build_uploaded_ghostface_v20.py` — reproducible extraction script for rebuilding the transparent atlases from the uploaded source image
 - `assets/detailed-transparent/ghostface_detailed_96x96.png` — prior cohesive player movement atlas, transparent RGBA, 4 frames, kept as fallback/reference
 - `assets/detailed-transparent/ghostface_detailed_attack_96x96.png` — prior cohesive player attack atlas, transparent RGBA, 4 frames, kept as fallback/reference
 - `assets/detailed-transparent/guard_detailed_80x80.png` — guard/hunter atlas with translucent flashlight cone, transparent RGBA, 4 frames
@@ -54,4 +59,4 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 
 ## Notes
 
-The player runtime art now uses `assets/modern-fit/`, a refit of the preferred modern Ghostface sheet that was tested before deployment: true alpha transparency, a taller 96×128 full-body frame so the head, robe, legs/feet, and knife stay visible, a muted palette that matches the guard/world, hard alpha edges, and separate in-engine slash FX instead of the weaker baked-in modern attack effects. The unmodified cleaned modern sheet remains in `assets/modern-transparent/` as source/reference, and the previous detailed cohesive atlas remains in `assets/detailed-transparent/` as fallback/reference. Use nearest-neighbor filtering and the pivots documented in the manifests if importing these assets into another engine.
+The player runtime art now uses `assets/uploaded-ghostface-v20/`, extracted only from Nate's uploaded 6×6 Ghostface sprite sheet. The baked checkerboard preview background was removed into true PNG alpha, each player state uses the matching uploaded-sheet row (idle, walk, run, attack, hurt/death), and the attack no longer has separate in-engine slash particles or old/generated Ghostface frames mixed in. Use nearest-neighbor filtering and the pivots documented in the manifests if importing these assets into another engine.

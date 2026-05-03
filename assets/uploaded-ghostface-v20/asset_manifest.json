@@ -1,0 +1,707 @@
+{
+  "source_attachment": "/home/deck/ghostface-game/assets/uploaded-ghostface-v20/source_uploaded_ghostface_sheet.jpeg",
+  "source_image_size": [
+    1536,
+    1024
+  ],
+  "source_note": "Nate-approved uploaded Ghostface sheet; all player runtime Ghostface frames are extracted only from this sheet.",
+  "checkerboard_removed": "exterior flood-fill over bright low-saturation baked checkerboard per logical source cell",
+  "logical_grid": {
+    "columns": 6,
+    "rows": 6,
+    "x_edges": [
+      0,
+      256,
+      512,
+      768,
+      1024,
+      1280,
+      1536
+    ],
+    "y_edges": [
+      0,
+      171,
+      341,
+      512,
+      683,
+      853,
+      1024
+    ]
+  },
+  "runtime_cell": {
+    "width": 192,
+    "height": 144,
+    "scale_from_source_cell": 0.75,
+    "pivot": "bottom-center; engine draws bottom at entity y + 20"
+  },
+  "animations": {
+    "idle": {
+      "file": "ghostface_uploaded_v20_idle_192x144.png",
+      "frames": 6,
+      "row": 0,
+      "cell_width": 192,
+      "cell_height": 144,
+      "frame_metadata": [
+        {
+          "column": 0,
+          "source_rect": [
+            0,
+            0,
+            256,
+            171
+          ],
+          "bbox": [
+            60,
+            26,
+            147,
+            129
+          ],
+          "opaque_pixels": 6011
+        },
+        {
+          "column": 1,
+          "source_rect": [
+            256,
+            0,
+            256,
+            171
+          ],
+          "bbox": [
+            56,
+            26,
+            144,
+            129
+          ],
+          "opaque_pixels": 5990
+        },
+        {
+          "column": 2,
+          "source_rect": [
+            512,
+            0,
+            256,
+            171
+          ],
+          "bbox": [
+            42,
+            26,
+            130,
+            129
+          ],
+          "opaque_pixels": 5885
+        },
+        {
+          "column": 3,
+          "source_rect": [
+            768,
+            0,
+            256,
+            171
+          ],
+          "bbox": [
+            28,
+            26,
+            115,
+            129
+          ],
+          "opaque_pixels": 5928
+        },
+        {
+          "column": 4,
+          "source_rect": [
+            1024,
+            0,
+            256,
+            171
+          ],
+          "bbox": [
+            27,
+            26,
+            114,
+            129
+          ],
+          "opaque_pixels": 6006
+        },
+        {
+          "column": 5,
+          "source_rect": [
+            1280,
+            0,
+            256,
+            171
+          ],
+          "bbox": [
+            19,
+            26,
+            104,
+            129
+          ],
+          "opaque_pixels": 5986
+        }
+      ]
+    },
+    "walk": {
+      "file": "ghostface_uploaded_v20_walk_192x144.png",
+      "frames": 6,
+      "row": 1,
+      "cell_width": 192,
+      "cell_height": 144,
+      "frame_metadata": [
+        {
+          "column": 0,
+          "source_rect": [
+            0,
+            171,
+            256,
+            170
+          ],
+          "bbox": [
+            55,
+            22,
+            144,
+            129
+          ],
+          "opaque_pixels": 5780
+        },
+        {
+          "column": 1,
+          "source_rect": [
+            256,
+            171,
+            256,
+            170
+          ],
+          "bbox": [
+            51,
+            24,
+            143,
+            129
+          ],
+          "opaque_pixels": 5819
+        },
+        {
+          "column": 2,
+          "source_rect": [
+            512,
+            171,
+            256,
+            170
+          ],
+          "bbox": [
+            35,
+            23,
+            123,
+            127
+          ],
+          "opaque_pixels": 5706
+        },
+        {
+          "column": 3,
+          "source_rect": [
+            768,
+            171,
+            256,
+            170
+          ],
+          "bbox": [
+            24,
+            24,
+            114,
+            129
+          ],
+          "opaque_pixels": 5770
+        },
+        {
+          "column": 4,
+          "source_rect": [
+            1024,
+            171,
+            256,
+            170
+          ],
+          "bbox": [
+            18,
+            24,
+            109,
+            129
+          ],
+          "opaque_pixels": 5906
+        },
+        {
+          "column": 5,
+          "source_rect": [
+            1280,
+            171,
+            256,
+            170
+          ],
+          "bbox": [
+            6,
+            24,
+            97,
+            129
+          ],
+          "opaque_pixels": 5916
+        }
+      ]
+    },
+    "run": {
+      "file": "ghostface_uploaded_v20_run_192x144.png",
+      "frames": 6,
+      "row": 2,
+      "cell_width": 192,
+      "cell_height": 144,
+      "frame_metadata": [
+        {
+          "column": 0,
+          "source_rect": [
+            0,
+            341,
+            256,
+            171
+          ],
+          "bbox": [
+            32,
+            20,
+            153,
+            136
+          ],
+          "opaque_pixels": 6616
+        },
+        {
+          "column": 1,
+          "source_rect": [
+            256,
+            341,
+            256,
+            171
+          ],
+          "bbox": [
+            29,
+            16,
+            154,
+            136
+          ],
+          "opaque_pixels": 6996
+        },
+        {
+          "column": 2,
+          "source_rect": [
+            512,
+            341,
+            256,
+            171
+          ],
+          "bbox": [
+            12,
+            20,
+            192,
+            136
+          ],
+          "opaque_pixels": 6878
+        },
+        {
+          "column": 3,
+          "source_rect": [
+            768,
+            341,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            17,
+            192,
+            136
+          ],
+          "opaque_pixels": 6891
+        },
+        {
+          "column": 4,
+          "source_rect": [
+            1024,
+            341,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            17,
+            192,
+            136
+          ],
+          "opaque_pixels": 7147
+        },
+        {
+          "column": 5,
+          "source_rect": [
+            1280,
+            341,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            16,
+            102,
+            113
+          ],
+          "opaque_pixels": 6212
+        }
+      ]
+    },
+    "attack": {
+      "file": "ghostface_uploaded_v20_attack_192x144.png",
+      "frames": 6,
+      "row": 3,
+      "cell_width": 192,
+      "cell_height": 144,
+      "frame_metadata": [
+        {
+          "column": 0,
+          "source_rect": [
+            0,
+            512,
+            256,
+            171
+          ],
+          "bbox": [
+            53,
+            8,
+            150,
+            136
+          ],
+          "opaque_pixels": 6565
+        },
+        {
+          "column": 1,
+          "source_rect": [
+            256,
+            512,
+            256,
+            171
+          ],
+          "bbox": [
+            28,
+            8,
+            132,
+            136
+          ],
+          "opaque_pixels": 6335
+        },
+        {
+          "column": 2,
+          "source_rect": [
+            512,
+            512,
+            256,
+            171
+          ],
+          "bbox": [
+            11,
+            8,
+            192,
+            136
+          ],
+          "opaque_pixels": 6067
+        },
+        {
+          "column": 3,
+          "source_rect": [
+            768,
+            512,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            8,
+            192,
+            109
+          ],
+          "opaque_pixels": 6765
+        },
+        {
+          "column": 4,
+          "source_rect": [
+            1024,
+            512,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            8,
+            192,
+            109
+          ],
+          "opaque_pixels": 6576
+        },
+        {
+          "column": 5,
+          "source_rect": [
+            1280,
+            512,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            17,
+            105,
+            109
+          ],
+          "opaque_pixels": 5540
+        }
+      ]
+    },
+    "crouch": {
+      "file": "ghostface_uploaded_v20_crouch_192x144.png",
+      "frames": 6,
+      "row": 4,
+      "cell_width": 192,
+      "cell_height": 144,
+      "frame_metadata": [
+        {
+          "column": 0,
+          "source_rect": [
+            0,
+            683,
+            256,
+            170
+          ],
+          "bbox": [
+            50,
+            8,
+            144,
+            136
+          ],
+          "opaque_pixels": 6333
+        },
+        {
+          "column": 1,
+          "source_rect": [
+            256,
+            683,
+            256,
+            170
+          ],
+          "bbox": [
+            30,
+            8,
+            132,
+            136
+          ],
+          "opaque_pixels": 6254
+        },
+        {
+          "column": 2,
+          "source_rect": [
+            512,
+            683,
+            256,
+            170
+          ],
+          "bbox": [
+            18,
+            8,
+            113,
+            136
+          ],
+          "opaque_pixels": 5697
+        },
+        {
+          "column": 3,
+          "source_rect": [
+            768,
+            683,
+            256,
+            170
+          ],
+          "bbox": [
+            3,
+            10,
+            192,
+            96
+          ],
+          "opaque_pixels": 6203
+        },
+        {
+          "column": 4,
+          "source_rect": [
+            1024,
+            683,
+            256,
+            170
+          ],
+          "bbox": [
+            0,
+            14,
+            192,
+            96
+          ],
+          "opaque_pixels": 5841
+        },
+        {
+          "column": 5,
+          "source_rect": [
+            1280,
+            683,
+            256,
+            170
+          ],
+          "bbox": [
+            0,
+            12,
+            62,
+            96
+          ],
+          "opaque_pixels": 3860
+        }
+      ]
+    },
+    "hurt_death": {
+      "file": "ghostface_uploaded_v20_hurt_death_192x144.png",
+      "frames": 6,
+      "row": 5,
+      "cell_width": 192,
+      "cell_height": 144,
+      "frame_metadata": [
+        {
+          "column": 0,
+          "source_rect": [
+            0,
+            853,
+            256,
+            171
+          ],
+          "bbox": [
+            38,
+            8,
+            141,
+            103
+          ],
+          "opaque_pixels": 6035
+        },
+        {
+          "column": 1,
+          "source_rect": [
+            256,
+            853,
+            256,
+            171
+          ],
+          "bbox": [
+            21,
+            8,
+            192,
+            103
+          ],
+          "opaque_pixels": 6191
+        },
+        {
+          "column": 2,
+          "source_rect": [
+            512,
+            853,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            8,
+            192,
+            100
+          ],
+          "opaque_pixels": 7015
+        },
+        {
+          "column": 3,
+          "source_rect": [
+            768,
+            853,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            32,
+            192,
+            101
+          ],
+          "opaque_pixels": 4844
+        },
+        {
+          "column": 4,
+          "source_rect": [
+            1024,
+            853,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            57,
+            192,
+            104
+          ],
+          "opaque_pixels": 4834
+        },
+        {
+          "column": 5,
+          "source_rect": [
+            1280,
+            853,
+            256,
+            171
+          ],
+          "bbox": [
+            0,
+            54,
+            119,
+            104
+          ],
+          "opaque_pixels": 3775
+        }
+      ]
+    }
+  },
+  "files": {
+    "ghostface_uploaded_v20_idle_192x144.png": {
+      "bytes": 85324,
+      "sha256": "42f5195fddf27cb5d168354f05278aa4faf7a05b7466e5d974c445d7ee3e3063"
+    },
+    "ghostface_uploaded_v20_walk_192x144.png": {
+      "bytes": 83958,
+      "sha256": "d70f44f53f7cfa03dc07cb875f5dcfd964a665b2391a847e5e4ab5e1f80222c7"
+    },
+    "ghostface_uploaded_v20_run_192x144.png": {
+      "bytes": 91906,
+      "sha256": "5d02fe0a566363f104b4f74f968745d4b633295923300a89f186685c7f819a04"
+    },
+    "ghostface_uploaded_v20_attack_192x144.png": {
+      "bytes": 89278,
+      "sha256": "76df9a21f0852281b2b1013ebc421c793ec09cf38ff6d2f551ab85681a426a69"
+    },
+    "ghostface_uploaded_v20_crouch_192x144.png": {
+      "bytes": 82843,
+      "sha256": "71491e8008f64945957c7a1402501fe3dd338cab323526050a005fe674bcc030"
+    },
+    "ghostface_uploaded_v20_hurt_death_192x144.png": {
+      "bytes": 83778,
+      "sha256": "b4dbf98124fd2e659ac479b1d2a4bfa738d616ced0aa2d4124560e1d169bb849"
+    },
+    "ghostface_uploaded_v20_full_transparent_192x144.png": {
+      "bytes": 517109,
+      "sha256": "955d1a42e52af42444bcf199521b0fea4509779002bb24346fbef109ff89486f",
+      "rows_stacked": [
+        "idle",
+        "walk",
+        "run",
+        "attack",
+        "crouch",
+        "hurt_death"
+      ]
+    }
+  }
+}
