@@ -248,13 +248,13 @@
     input.attack = input.attack || keys.has('Space'); input.dash = input.dash || keys.has('ShiftLeft') || keys.has('ShiftRight');
 
     player.inv = Math.max(0, player.inv - dt); player.atk = Math.max(0, player.atk - dt); player.dash = Math.max(0, player.dash - dt);
-    if (input.attackQueued && player.atk <= 0) { player.atk = .42; player.animT = 0; player.frame = 0; player.state = 'attack'; slashParticles(player.x + player.facing*28, player.y - 6, player.facing); shake = Math.max(shake, 5); }
+    if (input.attackQueued && player.atk <= 0) { player.atk = .56; player.animT = 0; player.frame = 0; player.state = 'attack'; slashParticles(player.x + player.facing*34, player.y - 8, player.facing); burst(player.x + player.facing*46, player.y - 10, '#dff7ff', 8); shake = Math.max(shake, 8); }
     if (input.dashQueued && player.dash <= 0) { player.dash = .72; player.inv = Math.max(player.inv, .28); burst(player.x, player.y, '#8be8ff', 12); }
     input.attackQueued = false; input.dashQueued = false;
 
     const moving = Math.hypot(ix,iy) > .1;
     if (moving) player.facing = ix >= 0 ? 1 : -1;
-    const sp = player.speed * (player.dash > .48 ? 2.55 : 1) * (player.atk > .12 ? .42 : 1);
+    const sp = player.speed * (player.dash > .48 ? 2.55 : 1) * (player.atk > .18 ? .35 : 1);
     moveEntity(player, ix * sp * dt, iy * sp * dt);
     player.state = player.atk > 0 ? 'attack' : moving ? (player.dash > .48 ? 'run' : 'walk') : 'idle';
 
@@ -371,12 +371,13 @@
   function drawEntity(e, isPlayer) {
     ctx.save(); ctx.translate(e.x, e.y); if (e.facing < 0) ctx.scale(-1,1);
     if (isPlayer && e.inv > 0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=.45;
-    drawSpriteLike(e.state, e.frame, isPlayer ? 1 : .94, isPlayer);
+    const drawFrame = isPlayer && e.state === 'attack' ? Math.min(3, Math.floor(clamp(1 - e.atk / .56, 0, .999) * 4)) : e.frame;
+    drawSpriteLike(e.state, drawFrame, isPlayer ? 1 : .94, isPlayer);
     ctx.restore();
     if (isPlayer && e.atk > 0) drawSlashEffect(e);
   }
   function drawSlashEffect(e) {
-    const progress = clamp(1 - e.atk / .42, 0, 1);
+    const progress = clamp(1 - e.atk / .56, 0, 1);
     ctx.save();
     ctx.translate(e.x + e.facing * 34, e.y - 7);
     ctx.scale(e.facing, 1);
@@ -388,19 +389,22 @@
       ctx.globalAlpha = .35 + a * .35;
       ctx.strokeStyle = 'rgba(220,245,255,.75)'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(4, -34); ctx.lineTo(28, -53); ctx.stroke();
-    } else if (progress < .68) {
-      // Active frame: big external crescent carries the hit, closer to Mega Man Zero / Hyper Light readability.
-      const a = (progress - .22) / .46;
-      ctx.globalAlpha = .95;
-      ctx.strokeStyle='rgba(236,252,255,.95)'; ctx.lineWidth=8;
-      ctx.beginPath(); ctx.arc(2, 0, 46, -.95 + a*.18, .75 + a*.18); ctx.stroke();
-      ctx.strokeStyle='rgba(217,32,54,.92)'; ctx.lineWidth=4;
-      ctx.beginPath(); ctx.arc(7, 4, 37, -.72 + a*.14, .60 + a*.14); ctx.stroke();
-      ctx.globalAlpha = .45; ctx.strokeStyle='rgba(139,232,255,.9)'; ctx.lineWidth=2;
-      ctx.beginPath(); ctx.arc(-2, -2, 54, -.78, .52); ctx.stroke();
+    } else if (progress < .70) {
+      // Active frame: oversized external crescent carries the hit clearly on mobile.
+      const a = (progress - .20) / .50;
+      ctx.globalAlpha = .18;
+      ctx.fillStyle = 'rgba(217,32,54,.95)';
+      ctx.beginPath(); ctx.moveTo(-8,-42); ctx.quadraticCurveTo(62,-20,78,30); ctx.quadraticCurveTo(36,20,-8,50); ctx.quadraticCurveTo(20,6,-8,-42); ctx.fill();
+      ctx.globalAlpha = .98;
+      ctx.strokeStyle='rgba(248,253,255,.98)'; ctx.lineWidth=11;
+      ctx.beginPath(); ctx.arc(4, 1, 58, -1.05 + a*.20, .78 + a*.22); ctx.stroke();
+      ctx.strokeStyle='rgba(217,32,54,.95)'; ctx.lineWidth=5;
+      ctx.beginPath(); ctx.arc(10, 6, 46, -.80 + a*.18, .62 + a*.18); ctx.stroke();
+      ctx.globalAlpha = .62; ctx.strokeStyle='rgba(139,232,255,.9)'; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.arc(-4, -3, 68, -.80, .50); ctx.stroke();
     } else {
       // Follow-through/recovery: slash fades and drops lower instead of snapping straight back to idle.
-      const a = 1 - (progress - .68) / .32;
+      const a = 1 - (progress - .70) / .30;
       ctx.globalAlpha = .25 + a * .45;
       ctx.strokeStyle='rgba(220,245,255,.75)'; ctx.lineWidth=5;
       ctx.beginPath(); ctx.arc(6, 8, 39, -.25, .82); ctx.stroke();
