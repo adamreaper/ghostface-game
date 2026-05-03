@@ -105,7 +105,7 @@
 
   const spriteAssets = {
     ghost: loadSprite('assets/modern-fit/ghostface_modern_fit_clean_v13_96x128.png', 96, 128, 4),
-    ghostAttack: loadSprite('assets/modern-fit/ghostface_modern_fit_attack_clean_v13_96x128.png', 96, 128, 4),
+    ghostAttack: loadSprite('assets/modern-fit/ghostface_modern_fit_attack_v14_96x128.png', 96, 128, 4),
     guard: loadSprite('assets/detailed-transparent/guard_detailed_80x80.png', 80, 80, 4),
     phone: loadSprite('assets/detailed-transparent/phone_detailed_32x32.png', 32, 32, 3),
     wall: loadSprite('assets/detailed-transparent/wall_tiles_detailed_64x64.png', 64, 64, 4)
@@ -248,7 +248,7 @@
     input.attack = input.attack || keys.has('Space'); input.dash = input.dash || keys.has('ShiftLeft') || keys.has('ShiftRight');
 
     player.inv = Math.max(0, player.inv - dt); player.atk = Math.max(0, player.atk - dt); player.dash = Math.max(0, player.dash - dt);
-    if (input.attackQueued && player.atk <= 0) { player.atk = .34; player.state = 'attack'; slashParticles(player.x + player.facing*28, player.y - 6, player.facing); shake = Math.max(shake, 4); }
+    if (input.attackQueued && player.atk <= 0) { player.atk = .42; player.animT = 0; player.frame = 0; player.state = 'attack'; slashParticles(player.x + player.facing*28, player.y - 6, player.facing); shake = Math.max(shake, 5); }
     if (input.dashQueued && player.dash <= 0) { player.dash = .72; player.inv = Math.max(player.inv, .28); burst(player.x, player.y, '#8be8ff', 12); }
     input.attackQueued = false; input.dashQueued = false;
 
@@ -373,7 +373,7 @@
     if (isPlayer && e.inv > 0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=.45;
     drawSpriteLike(e.state, e.frame, isPlayer ? 1 : .94, isPlayer);
     ctx.restore();
-    if (isPlayer && e.atk > .12) { ctx.save(); ctx.translate(e.x + e.facing*34, e.y-4); ctx.scale(e.facing,1); ctx.strokeStyle='rgba(220,245,255,.75)'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(0,0,38,-.8,.65); ctx.stroke(); ctx.strokeStyle='rgba(217,32,54,.8)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(4,2,32,-.5,.55); ctx.stroke(); ctx.restore(); }
+    if (isPlayer && e.atk > 0) { ctx.save(); ctx.translate(e.x + e.facing*34, e.y-4); ctx.scale(e.facing,1); const slashLife = clamp(e.atk / .42, 0, 1); ctx.globalAlpha = .35 + .55 * slashLife; ctx.strokeStyle='rgba(220,245,255,.9)'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(0,0,42,-.9,.78); ctx.stroke(); ctx.strokeStyle='rgba(217,32,54,.9)'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(5,2,35,-.62,.62); ctx.stroke(); ctx.restore(); }
   }
   function drawEnemyHealthBar(e) {
     const pct = clamp(e.hp / e.maxHp, 0, 1);
