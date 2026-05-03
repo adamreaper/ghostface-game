@@ -1,0 +1,1146 @@
+{
+  "source_attachment": "/home/deck/ghostface-game/assets/uploaded-ghostface-v21/source_uploaded_ghostface_sheet.jpeg",
+  "source_image_size": [
+    1536,
+    1024
+  ],
+  "source_note": "Nate-approved uploaded Ghostface sheet; all player runtime Ghostface frames are extracted only from this sheet.",
+  "v21_fix": "Repacked each transparent frame around a stable bottom-center pivot to stop idle crawling and attack jitter caused by source-cell x drift.",
+  "checkerboard_removed": "exterior flood-fill over bright low-saturation baked checkerboard per logical source cell",
+  "logical_grid": {
+    "columns": 6,
+    "rows": 6,
+    "x_edges": [
+      0,
+      256,
+      512,
+      768,
+      1024,
+      1280,
+      1536
+    ],
+    "y_edges": [
+      0,
+      171,
+      341,
+      512,
+      683,
+      853,
+      1024
+    ]
+  },
+  "runtime_cell": {
+    "width": 192,
+    "height": 144,
+    "scale_from_source_cell": 0.75,
+    "pivot": "stable bottom-center; engine draws bottom at entity y + 20"
+  },
+  "animations": {
+    "idle": {
+      "file": "ghostface_uploaded_v21_idle_192x144.png",
+      "frames": 6,
+      "row": 0,
+      "cell_width": 192,
+      "cell_height": 144,
+      "center_drift_after_repack": 1.0,
+      "frame_metadata": [
+        {
+          "crop_bbox": [
+            60,
+            18,
+            147,
+            121
+          ],
+          "placed_at": [
+            52,
+            29
+          ],
+          "bbox": [
+            52,
+            29,
+            139,
+            132
+          ],
+          "bbox_center_x": 95.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 6011,
+          "column": 0,
+          "source_rect": [
+            0,
+            0,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            56,
+            18,
+            144,
+            121
+          ],
+          "placed_at": [
+            52,
+            29
+          ],
+          "bbox": [
+            52,
+            29,
+            140,
+            132
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5990,
+          "column": 1,
+          "source_rect": [
+            256,
+            0,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            42,
+            18,
+            130,
+            121
+          ],
+          "placed_at": [
+            52,
+            29
+          ],
+          "bbox": [
+            52,
+            29,
+            140,
+            132
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5885,
+          "column": 2,
+          "source_rect": [
+            512,
+            0,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            28,
+            18,
+            115,
+            121
+          ],
+          "placed_at": [
+            52,
+            29
+          ],
+          "bbox": [
+            52,
+            29,
+            139,
+            132
+          ],
+          "bbox_center_x": 95.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5928,
+          "column": 3,
+          "source_rect": [
+            768,
+            0,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            27,
+            18,
+            114,
+            121
+          ],
+          "placed_at": [
+            52,
+            29
+          ],
+          "bbox": [
+            52,
+            29,
+            139,
+            132
+          ],
+          "bbox_center_x": 95.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 6006,
+          "column": 4,
+          "source_rect": [
+            1024,
+            0,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            19,
+            18,
+            104,
+            121
+          ],
+          "placed_at": [
+            54,
+            29
+          ],
+          "bbox": [
+            54,
+            29,
+            139,
+            132
+          ],
+          "bbox_center_x": 96.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5986,
+          "column": 5,
+          "source_rect": [
+            1280,
+            0,
+            256,
+            171
+          ]
+        }
+      ]
+    },
+    "walk": {
+      "file": "ghostface_uploaded_v21_walk_192x144.png",
+      "frames": 6,
+      "row": 1,
+      "cell_width": 192,
+      "cell_height": 144,
+      "center_drift_after_repack": 1.0,
+      "frame_metadata": [
+        {
+          "crop_bbox": [
+            55,
+            14,
+            144,
+            121
+          ],
+          "placed_at": [
+            52,
+            25
+          ],
+          "bbox": [
+            52,
+            25,
+            141,
+            132
+          ],
+          "bbox_center_x": 96.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5780,
+          "column": 0,
+          "source_rect": [
+            0,
+            171,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            51,
+            16,
+            143,
+            121
+          ],
+          "placed_at": [
+            50,
+            27
+          ],
+          "bbox": [
+            50,
+            27,
+            142,
+            132
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5819,
+          "column": 1,
+          "source_rect": [
+            256,
+            171,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            35,
+            15,
+            123,
+            119
+          ],
+          "placed_at": [
+            52,
+            28
+          ],
+          "bbox": [
+            52,
+            28,
+            140,
+            132
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5706,
+          "column": 2,
+          "source_rect": [
+            512,
+            171,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            24,
+            16,
+            114,
+            121
+          ],
+          "placed_at": [
+            51,
+            27
+          ],
+          "bbox": [
+            51,
+            27,
+            141,
+            132
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5770,
+          "column": 3,
+          "source_rect": [
+            768,
+            171,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            18,
+            16,
+            109,
+            121
+          ],
+          "placed_at": [
+            50,
+            27
+          ],
+          "bbox": [
+            50,
+            27,
+            141,
+            132
+          ],
+          "bbox_center_x": 95.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5906,
+          "column": 4,
+          "source_rect": [
+            1024,
+            171,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            6,
+            16,
+            97,
+            121
+          ],
+          "placed_at": [
+            50,
+            27
+          ],
+          "bbox": [
+            50,
+            27,
+            141,
+            132
+          ],
+          "bbox_center_x": 95.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 5916,
+          "column": 5,
+          "source_rect": [
+            1280,
+            171,
+            256,
+            170
+          ]
+        }
+      ]
+    },
+    "run": {
+      "file": "ghostface_uploaded_v21_run_192x144.png",
+      "frames": 6,
+      "row": 2,
+      "cell_width": 192,
+      "cell_height": 144,
+      "center_drift_after_repack": 0.5,
+      "frame_metadata": [
+        {
+          "crop_bbox": [
+            32,
+            12,
+            153,
+            128
+          ],
+          "placed_at": [
+            36,
+            22
+          ],
+          "bbox": [
+            36,
+            22,
+            157,
+            138
+          ],
+          "bbox_center_x": 96.5,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6616,
+          "column": 0,
+          "source_rect": [
+            0,
+            341,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            29,
+            8,
+            154,
+            128
+          ],
+          "placed_at": [
+            34,
+            18
+          ],
+          "bbox": [
+            34,
+            18,
+            159,
+            138
+          ],
+          "bbox_center_x": 96.5,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6996,
+          "column": 1,
+          "source_rect": [
+            256,
+            341,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            12,
+            12,
+            192,
+            128
+          ],
+          "placed_at": [
+            6,
+            22
+          ],
+          "bbox": [
+            6,
+            22,
+            186,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6878,
+          "column": 2,
+          "source_rect": [
+            512,
+            341,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            9,
+            192,
+            128
+          ],
+          "placed_at": [
+            0,
+            19
+          ],
+          "bbox": [
+            0,
+            19,
+            192,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6891,
+          "column": 3,
+          "source_rect": [
+            768,
+            341,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            9,
+            192,
+            128
+          ],
+          "placed_at": [
+            0,
+            19
+          ],
+          "bbox": [
+            0,
+            19,
+            192,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 7147,
+          "column": 4,
+          "source_rect": [
+            1024,
+            341,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            8,
+            102,
+            105
+          ],
+          "placed_at": [
+            45,
+            41
+          ],
+          "bbox": [
+            45,
+            41,
+            147,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6212,
+          "column": 5,
+          "source_rect": [
+            1280,
+            341,
+            256,
+            171
+          ]
+        }
+      ]
+    },
+    "attack": {
+      "file": "ghostface_uploaded_v21_attack_192x144.png",
+      "frames": 6,
+      "row": 3,
+      "cell_width": 192,
+      "cell_height": 144,
+      "center_drift_after_repack": 0.5,
+      "frame_metadata": [
+        {
+          "crop_bbox": [
+            53,
+            0,
+            150,
+            128
+          ],
+          "placed_at": [
+            48,
+            10
+          ],
+          "bbox": [
+            48,
+            10,
+            145,
+            138
+          ],
+          "bbox_center_x": 96.5,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6565,
+          "column": 0,
+          "source_rect": [
+            0,
+            512,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            28,
+            0,
+            132,
+            128
+          ],
+          "placed_at": [
+            44,
+            10
+          ],
+          "bbox": [
+            44,
+            10,
+            148,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6335,
+          "column": 1,
+          "source_rect": [
+            256,
+            512,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            11,
+            0,
+            192,
+            128
+          ],
+          "placed_at": [
+            6,
+            10
+          ],
+          "bbox": [
+            6,
+            10,
+            187,
+            138
+          ],
+          "bbox_center_x": 96.5,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6067,
+          "column": 2,
+          "source_rect": [
+            512,
+            512,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            0,
+            192,
+            101
+          ],
+          "placed_at": [
+            0,
+            37
+          ],
+          "bbox": [
+            0,
+            37,
+            192,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6765,
+          "column": 3,
+          "source_rect": [
+            768,
+            512,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            0,
+            192,
+            101
+          ],
+          "placed_at": [
+            0,
+            37
+          ],
+          "bbox": [
+            0,
+            37,
+            192,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6576,
+          "column": 4,
+          "source_rect": [
+            1024,
+            512,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            9,
+            105,
+            101
+          ],
+          "placed_at": [
+            44,
+            46
+          ],
+          "bbox": [
+            44,
+            46,
+            149,
+            138
+          ],
+          "bbox_center_x": 96.5,
+          "bbox_bottom": 138,
+          "opaque_pixels": 5540,
+          "column": 5,
+          "source_rect": [
+            1280,
+            512,
+            256,
+            171
+          ]
+        }
+      ]
+    },
+    "crouch": {
+      "file": "ghostface_uploaded_v21_crouch_192x144.png",
+      "frames": 6,
+      "row": 4,
+      "cell_width": 192,
+      "cell_height": 144,
+      "center_drift_after_repack": 1.0,
+      "frame_metadata": [
+        {
+          "crop_bbox": [
+            50,
+            0,
+            144,
+            128
+          ],
+          "placed_at": [
+            49,
+            10
+          ],
+          "bbox": [
+            49,
+            10,
+            143,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6333,
+          "column": 0,
+          "source_rect": [
+            0,
+            683,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            30,
+            0,
+            132,
+            128
+          ],
+          "placed_at": [
+            45,
+            10
+          ],
+          "bbox": [
+            45,
+            10,
+            147,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6254,
+          "column": 1,
+          "source_rect": [
+            256,
+            683,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            18,
+            0,
+            113,
+            128
+          ],
+          "placed_at": [
+            48,
+            10
+          ],
+          "bbox": [
+            48,
+            10,
+            143,
+            138
+          ],
+          "bbox_center_x": 95.5,
+          "bbox_bottom": 138,
+          "opaque_pixels": 5697,
+          "column": 2,
+          "source_rect": [
+            512,
+            683,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            3,
+            2,
+            192,
+            88
+          ],
+          "placed_at": [
+            2,
+            52
+          ],
+          "bbox": [
+            2,
+            52,
+            191,
+            138
+          ],
+          "bbox_center_x": 96.5,
+          "bbox_bottom": 138,
+          "opaque_pixels": 6203,
+          "column": 3,
+          "source_rect": [
+            768,
+            683,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            6,
+            192,
+            88
+          ],
+          "placed_at": [
+            0,
+            56
+          ],
+          "bbox": [
+            0,
+            56,
+            192,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 5841,
+          "column": 4,
+          "source_rect": [
+            1024,
+            683,
+            256,
+            170
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            4,
+            62,
+            88
+          ],
+          "placed_at": [
+            65,
+            54
+          ],
+          "bbox": [
+            65,
+            54,
+            127,
+            138
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 138,
+          "opaque_pixels": 3860,
+          "column": 5,
+          "source_rect": [
+            1280,
+            683,
+            256,
+            170
+          ]
+        }
+      ]
+    },
+    "hurt_death": {
+      "file": "ghostface_uploaded_v21_hurt_death_192x144.png",
+      "frames": 6,
+      "row": 5,
+      "cell_width": 192,
+      "cell_height": 144,
+      "center_drift_after_repack": 0.5,
+      "frame_metadata": [
+        {
+          "crop_bbox": [
+            38,
+            0,
+            141,
+            95
+          ],
+          "placed_at": [
+            44,
+            37
+          ],
+          "bbox": [
+            44,
+            37,
+            147,
+            132
+          ],
+          "bbox_center_x": 95.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 6035,
+          "column": 0,
+          "source_rect": [
+            0,
+            853,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            21,
+            0,
+            192,
+            95
+          ],
+          "placed_at": [
+            10,
+            37
+          ],
+          "bbox": [
+            10,
+            37,
+            181,
+            132
+          ],
+          "bbox_center_x": 95.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 6191,
+          "column": 1,
+          "source_rect": [
+            256,
+            853,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            0,
+            192,
+            92
+          ],
+          "placed_at": [
+            0,
+            40
+          ],
+          "bbox": [
+            0,
+            40,
+            192,
+            132
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 132,
+          "opaque_pixels": 7015,
+          "column": 2,
+          "source_rect": [
+            512,
+            853,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            24,
+            192,
+            93
+          ],
+          "placed_at": [
+            0,
+            63
+          ],
+          "bbox": [
+            0,
+            63,
+            192,
+            132
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 132,
+          "opaque_pixels": 4844,
+          "column": 3,
+          "source_rect": [
+            768,
+            853,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            49,
+            192,
+            96
+          ],
+          "placed_at": [
+            0,
+            85
+          ],
+          "bbox": [
+            0,
+            85,
+            192,
+            132
+          ],
+          "bbox_center_x": 96.0,
+          "bbox_bottom": 132,
+          "opaque_pixels": 4834,
+          "column": 4,
+          "source_rect": [
+            1024,
+            853,
+            256,
+            171
+          ]
+        },
+        {
+          "crop_bbox": [
+            0,
+            46,
+            119,
+            96
+          ],
+          "placed_at": [
+            36,
+            82
+          ],
+          "bbox": [
+            36,
+            82,
+            155,
+            132
+          ],
+          "bbox_center_x": 95.5,
+          "bbox_bottom": 132,
+          "opaque_pixels": 3775,
+          "column": 5,
+          "source_rect": [
+            1280,
+            853,
+            256,
+            171
+          ]
+        }
+      ]
+    }
+  },
+  "files": {
+    "ghostface_uploaded_v21_idle_192x144.png": {
+      "bytes": 85296,
+      "sha256": "f9a2c1e2e5ec055b5cdb75e18a548ab730c16d9194e31235ab3b829ed3b31a73"
+    },
+    "ghostface_uploaded_v21_walk_192x144.png": {
+      "bytes": 83864,
+      "sha256": "29dcd51d4d61f99c4f2d69f2bf6f51364d9ffeb6a9337943bc53752f0bc98dc4"
+    },
+    "ghostface_uploaded_v21_run_192x144.png": {
+      "bytes": 93858,
+      "sha256": "63fe97c9cf43193667f6c0dbfb689bdece5e75f20f64dc93084eb525ae8f9a8d"
+    },
+    "ghostface_uploaded_v21_attack_192x144.png": {
+      "bytes": 92404,
+      "sha256": "8072c4a892e29e98bf9bd2591dd4c5021ce7683c258875d912fc3077bb3fc82e"
+    },
+    "ghostface_uploaded_v21_crouch_192x144.png": {
+      "bytes": 86752,
+      "sha256": "bed9e5e5b9e87b99eae8059e00601e2661eb7701dc0632b22845b68e5511dbef"
+    },
+    "ghostface_uploaded_v21_hurt_death_192x144.png": {
+      "bytes": 84017,
+      "sha256": "908fb84c4559370b0161b48c3237eb356d31f49f95dd698c3336cfa7107b5732"
+    },
+    "ghostface_uploaded_v21_full_transparent_192x144.png": {
+      "bytes": 526178,
+      "sha256": "42fe6e6ceb252fb9ad511e10ce4c2df82b92676062c88619b423f003e3f534a4",
+      "rows_stacked": [
+        "idle",
+        "walk",
+        "run",
+        "attack",
+        "crouch",
+        "hurt_death"
+      ]
+    }
+  }
+}

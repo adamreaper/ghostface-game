@@ -104,11 +104,11 @@
   let stickPointer = null;
 
   const spriteAssets = {
-    ghostIdle: loadSprite('assets/uploaded-ghostface-v20/ghostface_uploaded_v20_idle_192x144.png', 192, 144, 6),
-    ghostWalk: loadSprite('assets/uploaded-ghostface-v20/ghostface_uploaded_v20_walk_192x144.png', 192, 144, 6),
-    ghostRun: loadSprite('assets/uploaded-ghostface-v20/ghostface_uploaded_v20_run_192x144.png', 192, 144, 6),
-    ghostAttack: loadSprite('assets/uploaded-ghostface-v20/ghostface_uploaded_v20_attack_192x144.png', 192, 144, 6),
-    ghostHurt: loadSprite('assets/uploaded-ghostface-v20/ghostface_uploaded_v20_hurt_death_192x144.png', 192, 144, 6),
+    ghostIdle: loadSprite('assets/uploaded-ghostface-v21/ghostface_uploaded_v21_idle_192x144.png', 192, 144, 6),
+    ghostWalk: loadSprite('assets/uploaded-ghostface-v21/ghostface_uploaded_v21_walk_192x144.png', 192, 144, 6),
+    ghostRun: loadSprite('assets/uploaded-ghostface-v21/ghostface_uploaded_v21_run_192x144.png', 192, 144, 6),
+    ghostAttack: loadSprite('assets/uploaded-ghostface-v21/ghostface_uploaded_v21_attack_192x144.png', 192, 144, 6),
+    ghostHurt: loadSprite('assets/uploaded-ghostface-v21/ghostface_uploaded_v21_hurt_death_192x144.png', 192, 144, 6),
     guard: loadSprite('assets/detailed-transparent/guard_detailed_80x80.png', 80, 80, 4),
     phone: loadSprite('assets/detailed-transparent/phone_detailed_32x32.png', 32, 32, 3),
     wall: loadSprite('assets/detailed-transparent/wall_tiles_detailed_64x64.png', 64, 64, 4)
@@ -251,7 +251,7 @@
     input.attack = input.attack || keys.has('Space'); input.dash = input.dash || keys.has('ShiftLeft') || keys.has('ShiftRight');
 
     player.inv = Math.max(0, player.inv - dt); player.atk = Math.max(0, player.atk - dt); player.dash = Math.max(0, player.dash - dt);
-    if (input.attackQueued && player.atk <= 0) { player.atk = .56; player.animT = 0; player.frame = 0; player.state = 'attack'; shake = Math.max(shake, 8); }
+    if (input.attackQueued && player.atk <= 0) { player.atk = .56; player.animT = 0; player.frame = 0; player.state = 'attack'; }
     if (input.dashQueued && player.dash <= 0) { player.dash = .72; player.inv = Math.max(player.inv, .28); burst(player.x, player.y, '#8be8ff', 12); }
     input.attackQueued = false; input.dashQueued = false;
 
@@ -373,7 +373,7 @@
   function drawEntity(e, isPlayer) {
     ctx.save(); ctx.translate(e.x, e.y); if (e.facing < 0) ctx.scale(-1,1);
     if (isPlayer && e.inv > 0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=.45;
-    const drawFrame = isPlayer && e.state === 'attack' ? Math.min(5, Math.floor(clamp(1 - e.atk / .56, 0, .999) * 6)) : e.frame;
+    const drawFrame = isPlayer && e.state === 'attack' ? Math.min(5, Math.floor(clamp(1 - e.atk / .56, 0, .999) * 6)) : isPlayer && e.state === 'idle' ? 0 : e.frame;
     drawSpriteLike(e.state, drawFrame, isPlayer ? 1 : .94, isPlayer);
     ctx.restore();
   }
@@ -396,7 +396,7 @@
       drawAtlasFrame(sheet, idx, -outW / 2, isPlayer ? 20 * s - outH : -68 * s, outW, outH);
       return;
     }
-    // No procedural Ghostface fallback: player visuals must come only from Nate's uploaded atlas.
+    // No procedural Ghostface fallback: player visuals must come only from Nate's uploaded, stable-pivot atlas.
     if (isPlayer) { ctx.globalAlpha *= .3; ctx.fillStyle='rgba(0,0,0,.75)'; ctx.beginPath(); ctx.ellipse(0, 12, 26, 9, 0, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha=1; }
     else drawGuardSprite(state, frame, s);
   }

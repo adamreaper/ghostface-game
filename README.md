@@ -36,14 +36,14 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 ## Files
 
 - `index.html` — single-page game prototype using transparent pixel-art atlas assets
-- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_idle_192x144.png` — runtime player idle atlas extracted only from Nate's uploaded 6×6 Ghostface sheet, transparent RGBA, 6 frames
-- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_walk_192x144.png` — runtime player walk atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames
-- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_run_192x144.png` — runtime player run atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames
-- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_attack_192x144.png` — runtime player slash atlas extracted only from Nate's uploaded sheet row 4, transparent RGBA, 6 frames with baked sheet slash poses/effects; no procedural slash particles are used
-- `assets/uploaded-ghostface-v20/ghostface_uploaded_v20_hurt_death_192x144.png` — runtime player hurt/death atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames
-- `assets/uploaded-ghostface-v20/source_uploaded_ghostface_sheet.jpeg` — Nate's uploaded source sheet used for every runtime player Ghostface frame
-- `assets/uploaded-ghostface-v20/asset_manifest.json` — source, grid, cell sizes, pivots, frame metadata, and import notes for the uploaded-sheet-only runtime player assets
-- `scripts/build_uploaded_ghostface_v20.py` — reproducible extraction script for rebuilding the transparent atlases from the uploaded source image
+- `assets/uploaded-ghostface-v21/ghostface_uploaded_v21_idle_192x144.png` — runtime player idle atlas extracted only from Nate's uploaded 6×6 Ghostface sheet, transparent RGBA, 6 frames repacked on a stable pivot; runtime freezes idle on frame 0 so Ghostface does not drift while standing
+- `assets/uploaded-ghostface-v21/ghostface_uploaded_v21_walk_192x144.png` — runtime player walk atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames with stable center/baseline alignment
+- `assets/uploaded-ghostface-v21/ghostface_uploaded_v21_run_192x144.png` — runtime player run atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames with stable center/baseline alignment
+- `assets/uploaded-ghostface-v21/ghostface_uploaded_v21_attack_192x144.png` — runtime player slash atlas extracted only from Nate's uploaded sheet row 4, transparent RGBA, 6 frames with stable center/baseline alignment; no procedural slash particles or slash camera shake are used
+- `assets/uploaded-ghostface-v21/ghostface_uploaded_v21_hurt_death_192x144.png` — runtime player hurt/death atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames with stable center/baseline alignment
+- `assets/uploaded-ghostface-v21/source_uploaded_ghostface_sheet.jpeg` — Nate's uploaded source sheet used for every runtime player Ghostface frame
+- `assets/uploaded-ghostface-v21/asset_manifest.json` — source, grid, stable-pivot cell sizes, frame metadata, and import notes for the uploaded-sheet-only runtime player assets
+- `scripts/build_uploaded_ghostface_v21.py` — reproducible stable-pivot extraction script for rebuilding the transparent atlases from the uploaded source image
 - `assets/detailed-transparent/ghostface_detailed_96x96.png` — prior cohesive player movement atlas, transparent RGBA, 4 frames, kept as fallback/reference
 - `assets/detailed-transparent/ghostface_detailed_attack_96x96.png` — prior cohesive player attack atlas, transparent RGBA, 4 frames, kept as fallback/reference
 - `assets/detailed-transparent/guard_detailed_80x80.png` — guard/hunter atlas with translucent flashlight cone, transparent RGBA, 4 frames
@@ -59,4 +59,4 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 
 ## Notes
 
-The player runtime art now uses `assets/uploaded-ghostface-v20/`, extracted only from Nate's uploaded 6×6 Ghostface sprite sheet. The baked checkerboard preview background was removed into true PNG alpha, each player state uses the matching uploaded-sheet row (idle, walk, run, attack, hurt/death), and the attack no longer has separate in-engine slash particles or old/generated Ghostface frames mixed in. Use nearest-neighbor filtering and the pivots documented in the manifests if importing these assets into another engine.
+The player runtime art now uses `assets/uploaded-ghostface-v21/`, extracted only from Nate's uploaded 6×6 Ghostface sprite sheet. The baked checkerboard preview background was removed into true PNG alpha, each player state uses the matching uploaded-sheet row (idle, walk, run, attack, hurt/death), and every frame is repacked to a stable bottom-center pivot so Ghostface no longer crawls backward/forward while idle or pops during slash. Idle rendering is locked to frame 0 for a steady standing pose, and attack no longer uses separate in-engine slash particles or slash camera shake. Use nearest-neighbor filtering and the pivots documented in the manifests if importing these assets into another engine.
