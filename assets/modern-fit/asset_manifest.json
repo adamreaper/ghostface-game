@@ -1,184 +1,160 @@
 {
-  "source": "preferred full modern Ghostface sheet row 0, refit to show complete head-to-toe body in 96x128 cells",
+  "source": "preferred modern Ghostface runtime asset cleaned to remove the lower phantom/crouch component accidentally baked into each frame",
   "cell_width": 96,
   "cell_height": 128,
   "frames": 4,
-  "draw_origin": "center feet baseline; engine draws cell at -48,-108 with nearest-neighbor so full head-to-toe sprite remains visible",
+  "draw_origin": "center feet baseline; engine draws cell at -48,-108 with nearest-neighbor",
   "import": "RGBA PNG, transparent background, no smoothing, clamp/nearest, no mipmaps",
   "movement": [
     {
       "frame": 0,
-      "source_cell": [
-        0,
-        0
-      ],
-      "source_crop": [
-        65,
-        17,
-        203,
-        255
-      ],
-      "bbox": [
-        17,
+      "removed_phantom": true,
+      "source_kept_component_bbox": [
+        20,
         10,
         78,
-        124
+        78
       ],
-      "opaque_pixels": 4221,
+      "bbox": [
+        10,
+        18,
+        91,
+        118
+      ],
+      "opaque_pixels": 6034,
       "colors": 14
     },
     {
       "frame": 1,
-      "source_cell": [
-        0,
-        1
-      ],
-      "source_crop": [
-        60,
-        17,
-        198,
-        255
-      ],
-      "bbox": [
-        17,
+      "removed_phantom": true,
+      "source_kept_component_bbox": [
+        20,
         10,
         78,
-        124
+        78
       ],
-      "opaque_pixels": 4217,
+      "bbox": [
+        10,
+        18,
+        91,
+        118
+      ],
+      "opaque_pixels": 6055,
       "colors": 14
     },
     {
       "frame": 2,
-      "source_cell": [
-        0,
-        2
-      ],
-      "source_crop": [
-        37,
-        17,
-        180,
-        255
-      ],
-      "bbox": [
-        16,
+      "removed_phantom": true,
+      "source_kept_component_bbox": [
+        22,
         10,
         80,
-        124
+        78
       ],
-      "opaque_pixels": 4173,
+      "bbox": [
+        10,
+        18,
+        91,
+        118
+      ],
+      "opaque_pixels": 6029,
       "colors": 14
     },
     {
       "frame": 3,
-      "source_cell": [
-        0,
-        3
-      ],
-      "source_crop": [
-        22,
-        17,
-        161,
-        255
-      ],
-      "bbox": [
-        17,
+      "removed_phantom": true,
+      "source_kept_component_bbox": [
+        21,
         10,
         79,
-        124
+        78
       ],
-      "opaque_pixels": 4121,
+      "bbox": [
+        10,
+        18,
+        91,
+        118
+      ],
+      "opaque_pixels": 5958,
       "colors": 14
     }
   ],
   "attack": [
     {
       "frame": 0,
-      "source_cell": [
-        0,
-        0
-      ],
-      "source_crop": [
-        65,
-        17,
-        203,
-        255
-      ],
-      "bbox": [
-        17,
+      "removed_phantom": true,
+      "source_kept_component_bbox": [
+        20,
         10,
         78,
-        124
+        78
       ],
-      "opaque_pixels": 4221,
+      "bbox": [
+        10,
+        18,
+        91,
+        118
+      ],
+      "opaque_pixels": 6034,
       "colors": 14
     },
     {
       "frame": 1,
-      "source_cell": [
-        0,
-        1
-      ],
-      "source_crop": [
-        60,
-        17,
-        198,
-        255
-      ],
-      "bbox": [
-        17,
+      "removed_phantom": true,
+      "source_kept_component_bbox": [
+        20,
         10,
         78,
-        124
+        78
       ],
-      "opaque_pixels": 4217,
+      "bbox": [
+        10,
+        18,
+        91,
+        118
+      ],
+      "opaque_pixels": 6055,
       "colors": 14
     },
     {
       "frame": 2,
-      "source_cell": [
-        0,
-        2
-      ],
-      "source_crop": [
-        37,
-        17,
-        180,
-        255
-      ],
-      "bbox": [
-        16,
+      "removed_phantom": true,
+      "source_kept_component_bbox": [
+        22,
         10,
         80,
-        124
+        78
       ],
-      "opaque_pixels": 4173,
+      "bbox": [
+        10,
+        18,
+        91,
+        118
+      ],
+      "opaque_pixels": 6029,
       "colors": 14
     },
     {
       "frame": 3,
-      "source_cell": [
-        0,
-        3
-      ],
-      "source_crop": [
-        22,
-        17,
-        161,
-        255
-      ],
-      "bbox": [
-        17,
+      "removed_phantom": true,
+      "source_kept_component_bbox": [
+        21,
         10,
         79,
-        124
+        78
       ],
-      "opaque_pixels": 4121,
+      "bbox": [
+        10,
+        18,
+        91,
+        118
+      ],
+      "opaque_pixels": 5958,
       "colors": 14
     }
   ],
   "notes": [
-    "Regenerated after QA: prior 96x96 runtime strip showed mostly the upper body. This version crops from full 256px source cells and scales the complete visible silhouette into 96x128 frames with padding.",
-    "Attack runtime intentionally reuses full-body cells; the canvas renders slash arcs separately for mobile readability."
+    "The prior 96x128 generation accidentally included a second lower Ghostface pose inside every frame. This version isolates the intended upper/standing connected component, rescales it to a full head-to-toe runtime sprite, and verifies only one component remains per frame.",
+    "Attack runtime intentionally reuses the cleaned full-body cells; the canvas renders slash arcs separately for mobile readability."
   ]
 }
