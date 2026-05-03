@@ -124,6 +124,8 @@
 
   const world = { w: 1600, h: 1000 };
   const camera = { x: 0, y: 0 };
+  const PLAYER_SPRITE_SCALE = .72;
+  const ENEMY_SPRITE_SCALE = .94;
   const player = { x: 210, y: 220, r: 18, vx: 0, vy: 0, speed: 185, hp: 100, facing: 1, state: 'idle', frame: 0, animT: 0, atk: 0, dash: 0, inv: 0, combo: 0 };
   const enemies = [];
   const phones = [];
@@ -374,7 +376,7 @@
     ctx.save(); ctx.translate(e.x, e.y); if (e.facing < 0) ctx.scale(-1,1);
     if (isPlayer && e.inv > 0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=.45;
     const drawFrame = isPlayer && e.state === 'attack' ? Math.min(5, Math.floor(clamp(1 - e.atk / .56, 0, .999) * 6)) : isPlayer && e.state === 'idle' ? 0 : e.frame;
-    drawSpriteLike(e.state, drawFrame, isPlayer ? 1 : .94, isPlayer);
+    drawSpriteLike(e.state, drawFrame, isPlayer ? PLAYER_SPRITE_SCALE : ENEMY_SPRITE_SCALE, isPlayer);
     ctx.restore();
   }
   function drawEnemyHealthBar(e) {
