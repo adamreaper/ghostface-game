@@ -156,5 +156,26 @@
   "notes": [
     "The prior 96x128 generation accidentally included a second lower Ghostface pose inside every frame. This version isolates the intended upper/standing connected component, rescales it to a full head-to-toe runtime sprite, and verifies only one component remains per frame.",
     "Attack runtime intentionally reuses the cleaned full-body cells; the canvas renders slash arcs separately for mobile readability."
-  ]
+  ],
+  "runtime_movement": "ghostface_modern_fit_clean_v13_96x128.png",
+  "runtime_attack": "ghostface_modern_fit_attack_clean_v13_96x128.png",
+  "cache_bust_note": "v13 filenames force mobile browsers to load the phantom-cleaned atlas instead of cached old same-path PNGs.",
+  "files": {
+    "ghostface_modern_fit_clean_v13_96x128.png": {
+      "bytes": 8656,
+      "sha256": "86e4aa11d4aea64e39e6dd4c817a7fca06f22ce8a9b9b7127fd149a520787438",
+      "cell_width": 96,
+      "cell_height": 128,
+      "frames": 4,
+      "phantom_cleaned": true
+    },
+    "ghostface_modern_fit_attack_clean_v13_96x128.png": {
+      "bytes": 8656,
+      "sha256": "86e4aa11d4aea64e39e6dd4c817a7fca06f22ce8a9b9b7127fd149a520787438",
+      "cell_width": 96,
+      "cell_height": 128,
+      "frames": 4,
+      "phantom_cleaned": true
+    }
+  }
 }
