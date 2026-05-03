@@ -1,0 +1,105 @@
+{
+  "source": "preferred modern transparent Ghostface sheet, palette-reduced and refit for mobile runtime cohesion",
+  "cell_width": 96,
+  "cell_height": 96,
+  "frames": 4,
+  "draw_origin": "center feet baseline; engine draws cell at -48,-76 with nearest-neighbor",
+  "import": "RGBA PNG, transparent background, no smoothing, clamp/nearest, no mipmaps",
+  "movement": [
+    {
+      "frame": 0,
+      "bbox": [
+        9,
+        30,
+        86,
+        85
+      ],
+      "opaque_pixels": 3354,
+      "colors": 13
+    },
+    {
+      "frame": 1,
+      "bbox": [
+        9,
+        32,
+        86,
+        85
+      ],
+      "opaque_pixels": 3297,
+      "colors": 13
+    },
+    {
+      "frame": 2,
+      "bbox": [
+        9,
+        31,
+        86,
+        85
+      ],
+      "opaque_pixels": 3246,
+      "colors": 13
+    },
+    {
+      "frame": 3,
+      "bbox": [
+        9,
+        33,
+        86,
+        85
+      ],
+      "opaque_pixels": 3214,
+      "colors": 13
+    }
+  ],
+  "attack": [
+    {
+      "frame": 0,
+      "bbox": [
+        9,
+        30,
+        86,
+        85
+      ],
+      "opaque_pixels": 3354,
+      "colors": 13
+    },
+    {
+      "frame": 1,
+      "bbox": [
+        9,
+        32,
+        86,
+        85
+      ],
+      "opaque_pixels": 3297,
+      "colors": 13
+    },
+    {
+      "frame": 2,
+      "bbox": [
+        9,
+        31,
+        86,
+        85
+      ],
+      "opaque_pixels": 3246,
+      "colors": 13
+    },
+    {
+      "frame": 3,
+      "bbox": [
+        9,
+        33,
+        86,
+        85
+      ],
+      "opaque_pixels": 3214,
+      "colors": 13
+    }
+  ],
+  "notes": [
+    "Uses the user-preferred modern sheet poses/silhouette, but refits scale, hard alpha, muted palette, and subtle dark edge pixels to reduce pasted-in look on mobile canvas.",
+    "Source modern-transparent assets remain as reference.",
+    "Attack runtime intentionally reuses the refit movement cells; the canvas renders slash arcs separately so the weak detached baked-in modern FX are not shipped."
+  ]
+}

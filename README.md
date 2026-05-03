@@ -36,8 +36,11 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 ## Files
 
 - `index.html` — single-page game prototype using transparent pixel-art atlas assets
-- `assets/detailed-transparent/ghostface_detailed_96x96.png` — runtime player movement atlas, transparent RGBA, 4 frames; used because it matches the guard/world pixel style better on mobile
-- `assets/detailed-transparent/ghostface_detailed_attack_96x96.png` — runtime player attack atlas, transparent RGBA, 4 frames
+- `assets/modern-fit/ghostface_modern_fit_96x96.png` — runtime player movement atlas remade from the preferred modern sheet, transparent RGBA, 4 frames, palette-reduced and refit for mobile canvas cohesion
+- `assets/modern-fit/ghostface_modern_fit_attack_96x96.png` — runtime player attack atlas using the same cleaned/refit modern cells while the engine draws the slash arc separately for better mobile readability
+- `assets/modern-fit/asset_manifest.json` — source, cell sizes, pivots, frame counts, and import notes for the runtime modern-fit player assets
+- `assets/detailed-transparent/ghostface_detailed_96x96.png` — prior cohesive player movement atlas, transparent RGBA, 4 frames, kept as fallback/reference
+- `assets/detailed-transparent/ghostface_detailed_attack_96x96.png` — prior cohesive player attack atlas, transparent RGBA, 4 frames, kept as fallback/reference
 - `assets/detailed-transparent/guard_detailed_80x80.png` — guard/hunter atlas with translucent flashlight cone, transparent RGBA, 4 frames
 - `assets/detailed-transparent/wall_tiles_detailed_64x64.png` — transparent RGBA wall tile variants, 4 frames/tiles
 - `assets/detailed-transparent/phone_detailed_32x32.png` — glowing phone pickup atlas, transparent RGBA, 3 frames
@@ -51,4 +54,4 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 
 ## Notes
 
-The player runtime art uses the transparent detailed pixel atlas so it matches the guard, wall, phone, and health-bar style in actual gameplay. The prior modern sheet has also been cleaned into true alpha transparency and kept in `assets/modern-transparent/` as reference art, but it is not used at runtime because it reads like a pasted-in cutout on the mobile canvas. Use nearest-neighbor filtering and the pivots documented in the manifests if importing these assets into another engine.
+The player runtime art now uses `assets/modern-fit/`, a refit of the preferred modern Ghostface sheet that was tested before deployment: true alpha transparency, a smaller mobile-safe footprint, a muted palette that matches the guard/world, hard alpha edges, and separate in-engine slash FX instead of the weaker baked-in modern attack effects. The unmodified cleaned modern sheet remains in `assets/modern-transparent/` as source/reference, and the previous detailed cohesive atlas remains in `assets/detailed-transparent/` as fallback/reference. Use nearest-neighbor filtering and the pivots documented in the manifests if importing these assets into another engine.
