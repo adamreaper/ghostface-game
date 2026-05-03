@@ -39,10 +39,10 @@
     .btn:active, .btn.active { transform: scale(.96); filter: brightness(1.25); }
     #attackBtn { right: 8px; bottom: 28px; width: 96px; height: 96px; background: radial-gradient(circle at 35% 28%, #ff6b79, #bd1028 56%, #4e0611); font-size: 18px; }
     #dashBtn { left: 8px; bottom: 8px; width: 68px; height: 68px; background: radial-gradient(circle at 35% 28%, #95efff, #147a9a 58%, #073044); font-size: 12px; }
-    .hint { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(86vw, 440px); padding: 18px; border-radius: 22px; background: rgba(6,5,10,.78); border: 1px solid var(--line); text-align: center; backdrop-filter: blur(10px); box-shadow: 0 24px 80px rgba(0,0,0,.5); pointer-events: none; transition: opacity .3s ease; }
-    .hint h1 { margin: 0 0 8px; font-size: 25px; letter-spacing: .04em; }
-    .hint p { margin: 6px 0; opacity: .85; font-size: 14px; line-height: 1.35; }
-    .hidden { opacity: 0; }
+    .hint { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 112px); transform: translateX(-50%); width: min(78vw, 360px); padding: 10px 12px; border-radius: 16px; background: rgba(6,5,10,.68); border: 1px solid var(--line); text-align: center; backdrop-filter: blur(8px); box-shadow: 0 14px 42px rgba(0,0,0,.38); pointer-events: none; transition: opacity .28s ease, visibility .28s ease; }
+    .hint h1 { margin: 0 0 4px; font-size: 16px; letter-spacing: .04em; }
+    .hint p { margin: 3px 0; opacity: .82; font-size: 11px; line-height: 1.25; }
+    .hidden { opacity: 0; visibility: hidden; }
     @media (min-width: 900px) { .stick-zone { width: 132px; height: 132px; } .buttons { transform: scale(.92); transform-origin: bottom right; } }
   </style>
 </head>
@@ -83,7 +83,7 @@
   let last = performance.now();
   let elapsed = 0;
   let shake = 0;
-  let pausedHintTimer = 4;
+  let pausedHintTimer = 1.8;
   let gameOverTimer = 0;
   let level = 1;
   let levelClearTimer = 0;
