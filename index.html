@@ -84,6 +84,7 @@
   let elapsed = 0;
   let shake = 0;
   let pausedHintTimer = 4;
+  let gameOverTimer = 0;
 
   const UI = {
     hp: document.getElementById('hpBar'), found: document.getElementById('found'), total: document.getElementById('total'),
@@ -113,11 +114,29 @@
 
   function initLevel() {
     phones.length = 0; obstacles.length = 0; particles.length = 0;
+    Object.assign(player, { x: 210, y: 220, vx: 0, vy: 0, hp: 100, facing: 1, state: 'idle', frame: 0, animT: 0, atk: 0, dash: 0, inv: 1.1, combo: 0 });
+    Object.assign(hunter, { x: 1250, y: 740, hp: 999, facing: -1, state: 'stalk', frame: 0, animT: 0, stun: 0, atk: 0 });
+    gameOverTimer = 0;
+    shake = 0;
     const phonePts = [[330,830],[690,190],[880,820],[1240,270],[1430,710]];
     for (const [x,y] of phonePts) phones.push({ x, y, r: 13, got: false, pulse: Math.random()*10 });
     const obs = [[480,420,210,56],[950,510,270,62],[230,610,60,260],[1210,130,70,260],[660,690,88,180],[1330,520,220,55]];
     for (const [x,y,w,h] of obs) obstacles.push({ x,y,w,h });
     UI.total.textContent = phones.length;
+    UI.status.textContent = 'Find phones. Avoid the hunter.';
+    updateUI();
+  }
+
+  function triggerGameOver() {
+    if (gameOverTimer > 0) return;
+    gameOverTimer = 3;
+    player.state = 'hurt';
+    input.x = input.y = 0;
+    input.attackQueued = input.dashQueued = false;
+    stick.style.transform = 'translate(0px,0px)';
+    shake = Math.max(shake, 14);
+    burst(player.x, player.y, '#d92036', 26);
+    UI.status.textContent = 'Caught. Restarting in 3...';
   }
 
   function resize() {
@@ -203,7 +222,8 @@
     hunter.facing = dx >= 0 ? 1 : -1;
     hunter.state = hunter.stun > 0 ? 'hurt' : seen ? 'run' : 'walk';
     if (l < hunter.r + player.r + 8 && player.inv <= 0) {
-      player.hp = Math.max(0, player.hp - 13); player.inv = .85; hunter.atk = .4; shake = 10; burst(player.x, player.y, '#d92036', 14); UI.status.textContent = player.hp <= 0 ? 'Caught. Refresh to restart prototype.' : 'The hunter hit you!';
+      player.hp = Math.max(0, player.hp - 13); player.inv = .85; hunter.atk = .4; shake = 10; burst(player.x, player.y, '#d92036', 14);
+      if (player.hp <= 0) triggerGameOver(); else UI.status.textContent = 'The hunter hit you!';
     }
     if (player.atk > .12 && Math.abs(player.x + player.facing*36 - hunter.x) < 54 && Math.abs(player.y - hunter.y) < 48) {
       hunter.stun = .48; shake = Math.max(shake, 7); burst(hunter.x, hunter.y, '#d92036', 9); player.combo++;
@@ -237,9 +257,21 @@
     if (phones.every(p=>p.got)) UI.status.textContent = 'Prototype win: all phones recovered.';
   }
 
+  function updateGameOver(dt) {
+    gameOverTimer = Math.max(0, gameOverTimer - dt);
+    updateParticles(dt);
+    animate(player, dt);
+    animate(hunter, dt);
+    shake = Math.max(0, shake - dt * 18);
+    const seconds = Math.ceil(gameOverTimer);
+    UI.status.textContent = seconds > 0 ? `Caught. Restarting in ${seconds}...` : 'Restarting...';
+    updateUI();
+    if (gameOverTimer <= 0) initLevel();
+  }
+
   function draw() {
     const now = performance.now(); const dt = Math.min(.033, (now-last)/1000); last = now;
-    if (player.hp > 0) update(dt);
+    if (player.hp > 0) update(dt); else updateGameOver(dt);
     render(); requestAnimationFrame(draw);
   }
 
@@ -248,7 +280,7 @@
     camera.x = clamp(player.x - W/(2*scale), 0, world.w - W/scale); camera.y = clamp(player.y - H/(2*scale), 0, world.h - H/scale);
     ctx.save(); ctx.clearRect(0,0,W,H); ctx.fillStyle = '#07060b'; ctx.fillRect(0,0,W,H);
     ctx.translate(sx, sy); ctx.scale(scale, scale); ctx.translate(-camera.x, -camera.y);
-    drawWorld(); drawPhones(); drawEntity(hunter, false); drawEntity(player, true); drawParticles(); ctx.restore(); drawVignette();
+    drawWorld(); drawPhones(); drawEntity(hunter, false); drawEntity(player, true); drawParticles(); ctx.restore(); drawVignette(); if (player.hp <= 0) drawGameOverOverlay();
   }
   function drawWorld() {
     const g = ctx.createLinearGradient(0,0,world.w,world.h); g.addColorStop(0,'#11101a'); g.addColorStop(.55,'#07080d'); g.addColorStop(1,'#181016'); ctx.fillStyle = g; ctx.fillRect(0,0,world.w,world.h);
@@ -283,6 +315,15 @@
   function drawVignette() {
     const rg = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.18,W/2,H/2,Math.max(W,H)*.72); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(.7,'rgba(0,0,0,.25)'); rg.addColorStop(1,'rgba(0,0,0,.82)'); ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
     ctx.fillStyle='rgba(217,32,54,.06)'; ctx.fillRect(0,0,W,H);
+  }
+  function drawGameOverOverlay() {
+    const seconds = Math.max(1, Math.ceil(gameOverTimer));
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,.48)'; ctx.fillRect(0,0,W,H);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff'; ctx.font = '900 28px Inter, system-ui, sans-serif'; ctx.fillText('CAUGHT', W/2, H/2 - 24);
+    ctx.fillStyle = '#ff6b79'; ctx.font = '800 15px Inter, system-ui, sans-serif'; ctx.fillText(`Restarting in ${seconds}...`, W/2, H/2 + 14);
+    ctx.restore();
   }
   function roundRect(x,y,w,h,r,fill) { ctx.beginPath(); ctx.roundRect(x,y,w,h,r); if(fill) ctx.fill(); else ctx.stroke(); }
 
