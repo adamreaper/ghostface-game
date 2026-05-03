@@ -1,0 +1,33 @@
+{
+  "source": "assets/ghostface-modern-sheet.png",
+  "full_clean_sheet": "ghostface-modern-sheet-transparent-clean.png",
+  "runtime": {
+    "movement": {
+      "file": "ghostface_modern_clean_96x96.png",
+      "cell": {
+        "w": 96,
+        "h": 96
+      },
+      "frames": 4,
+      "source_row": 0,
+      "pivot": {
+        "x": 48,
+        "y": 91
+      }
+    },
+    "attack": {
+      "file": "ghostface_modern_clean_attack_96x96.png",
+      "cell": {
+        "w": 96,
+        "h": 96
+      },
+      "frames": 4,
+      "source_row": 1,
+      "pivot": {
+        "x": 48,
+        "y": 91
+      }
+    }
+  },
+  "notes": "Baked checkerboard background removed via edge-connected background mask and exported as true PNG RGBA transparency. Runtime strips are normalized to 96x96 cells for the current canvas engine."
+}

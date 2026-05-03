@@ -35,16 +35,18 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 
 ## Files
 
-- `index.html` — single-page game prototype using transparent detailed pixel-art atlas assets
-- `assets/detailed-transparent/ghostface_detailed_96x96.png` — detailed Ghostface-inspired movement atlas, transparent RGBA, 4 frames
-- `assets/detailed-transparent/ghostface_detailed_attack_96x96.png` — detailed Ghostface-inspired attack atlas, transparent RGBA, 4 frames
+- `index.html` — single-page game prototype using transparent pixel-art atlas assets
+- `assets/modern-transparent/ghostface-modern-sheet-transparent-clean.png` — cleaned version of the prior modern Ghostface sprite sheet with true PNG RGBA transparency
+- `assets/modern-transparent/ghostface_modern_clean_96x96.png` — runtime movement strip remade from the modern sheet, transparent RGBA, 4 frames
+- `assets/modern-transparent/ghostface_modern_clean_attack_96x96.png` — runtime attack strip remade from the modern sheet, transparent RGBA, 4 frames
+- `assets/modern-transparent/asset_manifest.json` — source, cell sizes, pivots, and import notes for the remade modern sheet
 - `assets/detailed-transparent/guard_detailed_80x80.png` — guard/hunter atlas with translucent flashlight cone, transparent RGBA, 4 frames
 - `assets/detailed-transparent/wall_tiles_detailed_64x64.png` — transparent RGBA wall tile variants, 4 frames/tiles
 - `assets/detailed-transparent/phone_detailed_32x32.png` — glowing phone pickup atlas, transparent RGBA, 3 frames
-- `assets/detailed-transparent/asset_manifest.json` — cell sizes, pivots, frame counts, and import notes
+- `assets/detailed-transparent/asset_manifest.json` — cell sizes, pivots, frame counts, and import notes for guard/wall/phone assets
+- `assets/ghostface-modern-sheet.png` — original generated sprite sheet source/reference with baked checkerboard preview background
 - `assets/ghostface-modern-sheet-cutout.png` — older transparent cutout concept/reference sprite sheet
-- `assets/ghostface-modern-sheet.png` — original generated sprite sheet source/reference
 
 ## Notes
 
-The current runtime art is generated as native transparent RGBA pixel art from the start, not cut out from a white/chroma background. Use nearest-neighbor filtering and the pivots documented in `asset_manifest.json` if importing these assets into another engine.
+The player art now returns to the prior modern sprite-sheet style, but the baked checkerboard background has been rebuilt as true PNG alpha transparency. Runtime strips are normalized to 96x96 transparent cells for clean canvas rendering. Use nearest-neighbor filtering and the pivots documented in the manifests if importing these assets into another engine.
