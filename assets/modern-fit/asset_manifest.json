@@ -158,7 +158,7 @@
     "Attack runtime intentionally reuses the cleaned full-body cells; the canvas renders slash arcs separately for mobile readability."
   ],
   "runtime_movement": "ghostface_modern_fit_clean_v13_96x128.png",
-  "runtime_attack": "ghostface_modern_fit_attack_v15_96x128.png",
+  "runtime_attack": "ghostface_modern_source_attack_v18_96x128.png",
   "cache_bust_note": "v13 filenames force mobile browsers to load the phantom-cleaned atlas instead of cached old same-path PNGs.",
   "files": {
     "ghostface_modern_fit_clean_v13_96x128.png": {
@@ -195,7 +195,185 @@
       "phantom_cleaned": true,
       "attack_distinct": true,
       "baked_slash_fx": false
+    },
+    "ghostface_modern_source_attack_v17_96x128.png": {
+      "bytes": 32345,
+      "sha256": "ddaadc869fab699eb81c0d4006348fadf562d6eb0d6cc02993a68b4e7462c62f",
+      "cell_width": 96,
+      "cell_height": 128,
+      "frames": 4,
+      "phantom_cleaned": true,
+      "source_only_attack_row": true,
+      "source_cells": [
+        {
+          "frame": 0,
+          "source_row": 4,
+          "source_col": 1,
+          "source_bbox": [
+            62,
+            0,
+            208,
+            169
+          ],
+          "output_offset": [
+            4,
+            21
+          ],
+          "output_size": [
+            88,
+            102
+          ]
+        },
+        {
+          "frame": 1,
+          "source_row": 4,
+          "source_col": 3,
+          "source_bbox": [
+            6,
+            0,
+            255,
+            169
+          ],
+          "output_offset": [
+            4,
+            63
+          ],
+          "output_size": [
+            88,
+            60
+          ]
+        },
+        {
+          "frame": 2,
+          "source_row": 4,
+          "source_col": 5,
+          "source_bbox": [
+            0,
+            0,
+            255,
+            143
+          ],
+          "output_offset": [
+            4,
+            73
+          ],
+          "output_size": [
+            88,
+            50
+          ]
+        },
+        {
+          "frame": 3,
+          "source_row": 4,
+          "source_col": 6,
+          "source_bbox": [
+            0,
+            6,
+            148,
+            143
+          ],
+          "output_offset": [
+            4,
+            41
+          ],
+          "output_size": [
+            88,
+            82
+          ]
+        }
+      ]
+    },
+    "ghostface_modern_source_attack_v18_96x128.png": {
+      "bytes": 39172,
+      "sha256": "e82ee71478516de03217c2185d41d47f810ecc3f0d68f8b08650619f4d3acf59",
+      "cell_width": 96,
+      "cell_height": 128,
+      "frames": 4,
+      "source_only_attack_row": true,
+      "atlas_only_runtime": true,
+      "source_cells": [
+        {
+          "frame": 0,
+          "source_row": 4,
+          "source_col": 1,
+          "component": 11370,
+          "bbox": [
+            63,
+            0,
+            207,
+            142
+          ],
+          "offset": [
+            7,
+            41
+          ],
+          "size": [
+            82,
+            81
+          ]
+        },
+        {
+          "frame": 1,
+          "source_row": 4,
+          "source_col": 2,
+          "component": 11167,
+          "bbox": [
+            30,
+            0,
+            181,
+            142
+          ],
+          "offset": [
+            7,
+            45
+          ],
+          "size": [
+            82,
+            77
+          ]
+        },
+        {
+          "frame": 2,
+          "source_row": 4,
+          "source_col": 3,
+          "component": 10657,
+          "bbox": [
+            7,
+            0,
+            151,
+            142
+          ],
+          "offset": [
+            7,
+            41
+          ],
+          "size": [
+            82,
+            81
+          ]
+        },
+        {
+          "frame": 3,
+          "source_row": 4,
+          "source_col": 6,
+          "component": 9608,
+          "bbox": [
+            0,
+            7,
+            147,
+            142
+          ],
+          "offset": [
+            7,
+            47
+          ],
+          "size": [
+            82,
+            75
+          ]
+        }
+      ]
     }
   },
-  "attack_animation_note": "v15 uses a reference-style clean 4-frame attack pose sequence (wind-up, active lunge, follow-through, recovery) with no baked crescent clutter; the engine draws the large readable slash arc externally."
+  "attack_animation_note": "v18 is atlas-only: four clean frames extracted from the approved source sheet attack row using the largest body component per cell. Runtime procedural slash overlay and old Ghostface fallback are disabled to avoid mixed-animation artifacts."
 }

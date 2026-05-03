@@ -105,7 +105,7 @@
 
   const spriteAssets = {
     ghost: loadSprite('assets/modern-fit/ghostface_modern_fit_clean_v13_96x128.png', 96, 128, 4),
-    ghostAttack: loadSprite('assets/modern-fit/ghostface_modern_fit_attack_v15_96x128.png', 96, 128, 4),
+    ghostAttack: loadSprite('assets/modern-fit/ghostface_modern_source_attack_v18_96x128.png', 96, 128, 4),
     guard: loadSprite('assets/detailed-transparent/guard_detailed_80x80.png', 80, 80, 4),
     phone: loadSprite('assets/detailed-transparent/phone_detailed_32x32.png', 32, 32, 3),
     wall: loadSprite('assets/detailed-transparent/wall_tiles_detailed_64x64.png', 64, 64, 4)
@@ -374,44 +374,6 @@
     const drawFrame = isPlayer && e.state === 'attack' ? Math.min(3, Math.floor(clamp(1 - e.atk / .56, 0, .999) * 4)) : e.frame;
     drawSpriteLike(e.state, drawFrame, isPlayer ? 1 : .94, isPlayer);
     ctx.restore();
-    if (isPlayer && e.atk > 0) drawSlashEffect(e);
-  }
-  function drawSlashEffect(e) {
-    const progress = clamp(1 - e.atk / .56, 0, 1);
-    ctx.save();
-    ctx.translate(e.x + e.facing * 34, e.y - 7);
-    ctx.scale(e.facing, 1);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    if (progress < .22) {
-      // Wind-up cue: small bright blade glint behind/above the mask, like a Shovel Knight-style anticipation read.
-      const a = progress / .22;
-      ctx.globalAlpha = .35 + a * .35;
-      ctx.strokeStyle = 'rgba(220,245,255,.75)'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(4, -34); ctx.lineTo(28, -53); ctx.stroke();
-    } else if (progress < .70) {
-      // Active frame: oversized external crescent carries the hit clearly on mobile.
-      const a = (progress - .20) / .50;
-      ctx.globalAlpha = .18;
-      ctx.fillStyle = 'rgba(217,32,54,.95)';
-      ctx.beginPath(); ctx.moveTo(-8,-42); ctx.quadraticCurveTo(62,-20,78,30); ctx.quadraticCurveTo(36,20,-8,50); ctx.quadraticCurveTo(20,6,-8,-42); ctx.fill();
-      ctx.globalAlpha = .98;
-      ctx.strokeStyle='rgba(248,253,255,.98)'; ctx.lineWidth=11;
-      ctx.beginPath(); ctx.arc(4, 1, 58, -1.05 + a*.20, .78 + a*.22); ctx.stroke();
-      ctx.strokeStyle='rgba(217,32,54,.95)'; ctx.lineWidth=5;
-      ctx.beginPath(); ctx.arc(10, 6, 46, -.80 + a*.18, .62 + a*.18); ctx.stroke();
-      ctx.globalAlpha = .62; ctx.strokeStyle='rgba(139,232,255,.9)'; ctx.lineWidth=3;
-      ctx.beginPath(); ctx.arc(-4, -3, 68, -.80, .50); ctx.stroke();
-    } else {
-      // Follow-through/recovery: slash fades and drops lower instead of snapping straight back to idle.
-      const a = 1 - (progress - .70) / .30;
-      ctx.globalAlpha = .25 + a * .45;
-      ctx.strokeStyle='rgba(220,245,255,.75)'; ctx.lineWidth=5;
-      ctx.beginPath(); ctx.arc(6, 8, 39, -.25, .82); ctx.stroke();
-      ctx.strokeStyle='rgba(217,32,54,.65)'; ctx.lineWidth=2;
-      ctx.beginPath(); ctx.arc(10, 12, 31, -.15, .70); ctx.stroke();
-    }
-    ctx.restore();
   }
   function drawEnemyHealthBar(e) {
     const pct = clamp(e.hp / e.maxHp, 0, 1);
@@ -432,54 +394,14 @@
       drawAtlasFrame(sheet, idx, -outW / 2, isPlayer ? -108 * s : -68 * s, outW, outH);
       return;
     }
-    // Fallback while images load; the shipped assets are transparent RGBA PNGs.
-    if (isPlayer) drawGhostfaceSprite(state, frame, s); else drawGuardSprite(state, frame, s);
+    // No procedural Ghostface fallback: player visuals must come only from the approved atlas.
+    if (isPlayer) { ctx.globalAlpha *= .3; ctx.fillStyle='rgba(0,0,0,.75)'; ctx.beginPath(); ctx.ellipse(0, 12, 26, 9, 0, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha=1; }
+    else drawGuardSprite(state, frame, s);
   }
   function drawAtlasFrame(sheet, frame, dx, dy, dw, dh) {
     ctx.drawImage(sheet.img, frame * sheet.cellW, 0, sheet.cellW, sheet.cellH, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
   }
   function px(x,y,w,h,color) { ctx.fillStyle=color; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
-  function drawGhostfaceSprite(state, frame, s) {
-    ctx.save(); ctx.scale(s,s);
-    const bob = state === 'idle' ? Math.sin(elapsed*5)*1.5 : Math.sin(frame*.9)*2;
-    const attack = state === 'attack';
-    const run = state === 'run';
-    const lean = attack ? 7 : run ? 5 : state === 'walk' ? 2 : 0;
-    const step = Math.sin(frame * Math.PI / 3) * (run ? 6 : 4);
-    ctx.globalAlpha *= .35; ctx.fillStyle='rgba(0,0,0,.75)'; ctx.beginPath(); ctx.ellipse(0, 12, 26, 9, 0, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha /= .35;
-    // Boots first so they peek out from the robe.
-    px(-13 + step, 4, 12, 7, '#6f421f'); px(-9 + step, 3, 8, 3, '#a86a32');
-    px(7 - step, 4, 13, 7, '#6f421f'); px(10 - step, 3, 8, 3, '#a86a32');
-    // Flowing robe with jagged hem, inspired by the reference pose.
-    ctx.fillStyle='#08080c'; ctx.beginPath();
-    ctx.moveTo(-18+lean, -43+bob); ctx.lineTo(14+lean, -44+bob); ctx.lineTo(28+lean, -20+bob);
-    ctx.lineTo(25, 7); ctx.lineTo(16, 2); ctx.lineTo(8, 10); ctx.lineTo(0, 4); ctx.lineTo(-9, 11); ctx.lineTo(-18, 3); ctx.lineTo(-29, 8); ctx.lineTo(-24, -16+bob); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#1d1d2a'; ctx.beginPath(); ctx.moveTo(-8+lean,-31+bob); ctx.lineTo(10+lean,-31+bob); ctx.lineTo(16,2); ctx.lineTo(4,6); ctx.lineTo(-8,2); ctx.closePath(); ctx.fill();
-    px(10+lean,-30+bob,3,31,'#3d3a4f'); px(-15+lean,-24+bob,4,23,'#12121a');
-    // Hood taper and mask.
-    ctx.fillStyle='#050509'; ctx.beginPath(); ctx.moveTo(-19+lean,-54+bob); ctx.lineTo(13+lean,-56+bob); ctx.lineTo(31+lean,-41+bob); ctx.lineTo(12+lean,-24+bob); ctx.lineTo(-19+lean,-25+bob); ctx.lineTo(-30+lean,-42+bob); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#0d0d14'; ctx.beginPath(); ctx.moveTo(6+lean,-56+bob); ctx.lineTo(34+lean,-64+bob); ctx.lineTo(20+lean,-40+bob); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#f2f2ea'; roundRect(-7+lean,-51+bob,18,31,8,true); px(-4+lean,-39+bob,12,18,'#f2f2ea');
-    px(-3+lean,-43+bob,4,8,'#020204'); px(6+lean,-43+bob,4,8,'#020204'); px(1+lean,-31+bob,6,13,'#020204');
-    px(-6+lean,-28+bob,2,9,'#bfc2ba'); px(10+lean,-28+bob,2,8,'#bfc2ba');
-    // Arms and knife.
-    ctx.lineWidth=7; ctx.strokeStyle='#050509'; ctx.beginPath();
-    if (attack) { ctx.moveTo(11+lean,-30+bob); ctx.lineTo(32+lean,-11+bob); }
-    else { ctx.moveTo(9+lean,-31+bob); ctx.lineTo(22+lean,-61+bob); }
-    ctx.stroke();
-    ctx.lineWidth=4; ctx.strokeStyle='#242436'; ctx.stroke();
-    ctx.lineWidth=5; ctx.strokeStyle='#050509'; ctx.beginPath(); ctx.moveTo(-10+lean,-27+bob); ctx.lineTo(2+lean,-16+bob); ctx.stroke();
-    ctx.fillStyle='#20202d'; ctx.fillRect(-1+lean,-20+bob,7,6);
-    if (attack) drawKnife(33+lean,-12+bob,'down'); else drawKnife(22+lean,-62+bob,'up');
-    ctx.restore();
-  }
-  function drawKnife(x,y,dir) {
-    px(x-2,y,4,8,'#101015');
-    ctx.fillStyle='#dff7ff'; ctx.beginPath();
-    if (dir === 'down') { ctx.moveTo(x+2,y+5); ctx.lineTo(x+26,y+24); ctx.lineTo(x+26,y+30); ctx.lineTo(x+5,y+10); }
-    else { ctx.moveTo(x-3,y); ctx.lineTo(x+1,y-23); ctx.lineTo(x+6,y); ctx.lineTo(x+1,y+4); }
-    ctx.closePath(); ctx.fill(); ctx.strokeStyle='#69b7db'; ctx.lineWidth=1; ctx.stroke();
-  }
   function drawGuardSprite(state, frame, s) {
     ctx.save(); ctx.scale(s,s);
     const run = state === 'run'; const bob = Math.sin(frame*.9) * (run ? 2.5 : 1.5); const step = Math.sin(frame*Math.PI/3) * (run ? 6 : 3);
