@@ -37,7 +37,7 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 
 - `index.html` — single-page game prototype using transparent pixel-art atlas assets
 - `assets/modern-fit/ghostface_modern_fit_clean_v13_96x128.png` — runtime player movement atlas remade from the preferred modern sheet, transparent RGBA, 4 frames, full head-to-toe body visible in 96×128 cells; versioned filename forces mobile browsers past cached phantom sprites
-- `assets/modern-fit/ghostface_modern_source_attack_v18_96x128.png` — runtime player attack atlas extracted only from the approved modern source sheet’s attack row; no external procedural slash overlay or old fallback is mixed into runtime player rendering
+- `assets/modern-fit/ghostface_modern_attack_fullsize_v19_96x128.png` — runtime player attack atlas rebuilt on top of the full-size approved movement atlas so slash never shrinks Ghostface; runtime stays atlas-only with no external procedural overlay
 - `assets/modern-fit/asset_manifest.json` — source, cell sizes, pivots, frame counts, and import notes for the runtime modern-fit player assets
 - `assets/detailed-transparent/ghostface_detailed_96x96.png` — prior cohesive player movement atlas, transparent RGBA, 4 frames, kept as fallback/reference
 - `assets/detailed-transparent/ghostface_detailed_attack_96x96.png` — prior cohesive player attack atlas, transparent RGBA, 4 frames, kept as fallback/reference

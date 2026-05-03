@@ -158,7 +158,7 @@
     "Attack runtime intentionally reuses the cleaned full-body cells; the canvas renders slash arcs separately for mobile readability."
   ],
   "runtime_movement": "ghostface_modern_fit_clean_v13_96x128.png",
-  "runtime_attack": "ghostface_modern_source_attack_v18_96x128.png",
+  "runtime_attack": "ghostface_modern_attack_fullsize_v19_96x128.png",
   "cache_bust_note": "v13 filenames force mobile browsers to load the phantom-cleaned atlas instead of cached old same-path PNGs.",
   "files": {
     "ghostface_modern_fit_clean_v13_96x128.png": {
@@ -286,7 +286,42 @@
           ]
         }
       ]
+    },
+    "ghostface_modern_attack_fullsize_v19_96x128.png": {
+      "bytes": 9267,
+      "sha256": "1875cb19f12bb9cfe67d662af58f09084eea5cc62ac19547223ce55197456faf",
+      "cell_width": 96,
+      "cell_height": 128,
+      "frames": 4,
+      "fullsize_from_movement_atlas": true,
+      "atlas_only_runtime": true,
+      "frame_bboxes": [
+        [
+          10,
+          13,
+          91,
+          118
+        ],
+        [
+          10,
+          18,
+          95,
+          118
+        ],
+        [
+          0,
+          18,
+          95,
+          118
+        ],
+        [
+          0,
+          18,
+          91,
+          118
+        ]
+      ]
     }
   },
-  "attack_animation_note": "v18 is atlas-only: four clean frames extracted from the approved source sheet attack row using the largest body component per cell. Runtime procedural slash overlay and old Ghostface fallback are disabled to avoid mixed-animation artifacts."
+  "attack_animation_note": "v19 rebuilds the attack atlas from scratch on top of the approved full-size movement atlas so Ghostface cannot shrink on slash. Runtime remains atlas-only: no procedural Ghostface fallback and no external slash overlay."
 }
