@@ -1,105 +1,184 @@
 {
-  "source": "preferred modern transparent Ghostface sheet, palette-reduced and refit for mobile runtime cohesion",
+  "source": "preferred full modern Ghostface sheet row 0, refit to show complete head-to-toe body in 96x128 cells",
   "cell_width": 96,
-  "cell_height": 96,
+  "cell_height": 128,
   "frames": 4,
-  "draw_origin": "center feet baseline; engine draws cell at -48,-76 with nearest-neighbor",
+  "draw_origin": "center feet baseline; engine draws cell at -48,-108 with nearest-neighbor so full head-to-toe sprite remains visible",
   "import": "RGBA PNG, transparent background, no smoothing, clamp/nearest, no mipmaps",
   "movement": [
     {
       "frame": 0,
-      "bbox": [
-        9,
-        30,
-        86,
-        85
+      "source_cell": [
+        0,
+        0
       ],
-      "opaque_pixels": 3354,
-      "colors": 13
+      "source_crop": [
+        65,
+        17,
+        203,
+        255
+      ],
+      "bbox": [
+        17,
+        10,
+        78,
+        124
+      ],
+      "opaque_pixels": 4221,
+      "colors": 14
     },
     {
       "frame": 1,
-      "bbox": [
-        9,
-        32,
-        86,
-        85
+      "source_cell": [
+        0,
+        1
       ],
-      "opaque_pixels": 3297,
-      "colors": 13
+      "source_crop": [
+        60,
+        17,
+        198,
+        255
+      ],
+      "bbox": [
+        17,
+        10,
+        78,
+        124
+      ],
+      "opaque_pixels": 4217,
+      "colors": 14
     },
     {
       "frame": 2,
-      "bbox": [
-        9,
-        31,
-        86,
-        85
+      "source_cell": [
+        0,
+        2
       ],
-      "opaque_pixels": 3246,
-      "colors": 13
+      "source_crop": [
+        37,
+        17,
+        180,
+        255
+      ],
+      "bbox": [
+        16,
+        10,
+        80,
+        124
+      ],
+      "opaque_pixels": 4173,
+      "colors": 14
     },
     {
       "frame": 3,
-      "bbox": [
-        9,
-        33,
-        86,
-        85
+      "source_cell": [
+        0,
+        3
       ],
-      "opaque_pixels": 3214,
-      "colors": 13
+      "source_crop": [
+        22,
+        17,
+        161,
+        255
+      ],
+      "bbox": [
+        17,
+        10,
+        79,
+        124
+      ],
+      "opaque_pixels": 4121,
+      "colors": 14
     }
   ],
   "attack": [
     {
       "frame": 0,
-      "bbox": [
-        9,
-        30,
-        86,
-        85
+      "source_cell": [
+        0,
+        0
       ],
-      "opaque_pixels": 3354,
-      "colors": 13
+      "source_crop": [
+        65,
+        17,
+        203,
+        255
+      ],
+      "bbox": [
+        17,
+        10,
+        78,
+        124
+      ],
+      "opaque_pixels": 4221,
+      "colors": 14
     },
     {
       "frame": 1,
-      "bbox": [
-        9,
-        32,
-        86,
-        85
+      "source_cell": [
+        0,
+        1
       ],
-      "opaque_pixels": 3297,
-      "colors": 13
+      "source_crop": [
+        60,
+        17,
+        198,
+        255
+      ],
+      "bbox": [
+        17,
+        10,
+        78,
+        124
+      ],
+      "opaque_pixels": 4217,
+      "colors": 14
     },
     {
       "frame": 2,
-      "bbox": [
-        9,
-        31,
-        86,
-        85
+      "source_cell": [
+        0,
+        2
       ],
-      "opaque_pixels": 3246,
-      "colors": 13
+      "source_crop": [
+        37,
+        17,
+        180,
+        255
+      ],
+      "bbox": [
+        16,
+        10,
+        80,
+        124
+      ],
+      "opaque_pixels": 4173,
+      "colors": 14
     },
     {
       "frame": 3,
-      "bbox": [
-        9,
-        33,
-        86,
-        85
+      "source_cell": [
+        0,
+        3
       ],
-      "opaque_pixels": 3214,
-      "colors": 13
+      "source_crop": [
+        22,
+        17,
+        161,
+        255
+      ],
+      "bbox": [
+        17,
+        10,
+        79,
+        124
+      ],
+      "opaque_pixels": 4121,
+      "colors": 14
     }
   ],
   "notes": [
-    "Uses the user-preferred modern sheet poses/silhouette, but refits scale, hard alpha, muted palette, and subtle dark edge pixels to reduce pasted-in look on mobile canvas.",
-    "Source modern-transparent assets remain as reference.",
-    "Attack runtime intentionally reuses the refit movement cells; the canvas renders slash arcs separately so the weak detached baked-in modern FX are not shipped."
+    "Regenerated after QA: prior 96x96 runtime strip showed mostly the upper body. This version crops from full 256px source cells and scales the complete visible silhouette into 96x128 frames with padding.",
+    "Attack runtime intentionally reuses full-body cells; the canvas renders slash arcs separately for mobile readability."
   ]
 }

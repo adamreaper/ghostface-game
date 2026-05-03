@@ -36,8 +36,8 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 ## Files
 
 - `index.html` — single-page game prototype using transparent pixel-art atlas assets
-- `assets/modern-fit/ghostface_modern_fit_96x96.png` — runtime player movement atlas remade from the preferred modern sheet, transparent RGBA, 4 frames, palette-reduced and refit for mobile canvas cohesion
-- `assets/modern-fit/ghostface_modern_fit_attack_96x96.png` — runtime player attack atlas using the same cleaned/refit modern cells while the engine draws the slash arc separately for better mobile readability
+- `assets/modern-fit/ghostface_modern_fit_96x128.png` — runtime player movement atlas remade from the preferred modern sheet, transparent RGBA, 4 frames, full head-to-toe body visible in 96×128 cells
+- `assets/modern-fit/ghostface_modern_fit_attack_96x128.png` — runtime player attack atlas using the same full-body modern cells while the engine draws the slash arc separately for better mobile readability
 - `assets/modern-fit/asset_manifest.json` — source, cell sizes, pivots, frame counts, and import notes for the runtime modern-fit player assets
 - `assets/detailed-transparent/ghostface_detailed_96x96.png` — prior cohesive player movement atlas, transparent RGBA, 4 frames, kept as fallback/reference
 - `assets/detailed-transparent/ghostface_detailed_attack_96x96.png` — prior cohesive player attack atlas, transparent RGBA, 4 frames, kept as fallback/reference
@@ -54,4 +54,4 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 
 ## Notes
 
-The player runtime art now uses `assets/modern-fit/`, a refit of the preferred modern Ghostface sheet that was tested before deployment: true alpha transparency, a smaller mobile-safe footprint, a muted palette that matches the guard/world, hard alpha edges, and separate in-engine slash FX instead of the weaker baked-in modern attack effects. The unmodified cleaned modern sheet remains in `assets/modern-transparent/` as source/reference, and the previous detailed cohesive atlas remains in `assets/detailed-transparent/` as fallback/reference. Use nearest-neighbor filtering and the pivots documented in the manifests if importing these assets into another engine.
+The player runtime art now uses `assets/modern-fit/`, a refit of the preferred modern Ghostface sheet that was tested before deployment: true alpha transparency, a taller 96×128 full-body frame so the head, robe, legs/feet, and knife stay visible, a muted palette that matches the guard/world, hard alpha edges, and separate in-engine slash FX instead of the weaker baked-in modern attack effects. The unmodified cleaned modern sheet remains in `assets/modern-transparent/` as source/reference, and the previous detailed cohesive atlas remains in `assets/detailed-transparent/` as fallback/reference. Use nearest-neighbor filtering and the pivots documented in the manifests if importing these assets into another engine.
