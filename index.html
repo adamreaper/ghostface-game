@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#08070d" />
+  <title>Ghostface Mobile Prototype</title>
+  <style>
+    :root {
+      --bg: #07060b;
+      --panel: rgba(13, 12, 20, .72);
+      --line: rgba(255,255,255,.12);
+      --accent: #d92036;
+      --accent2: #8be8ff;
+      --text: #f2edf0;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg);
+      color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      touch-action: none; overscroll-behavior: none;
+    }
+    #game { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; image-rendering: pixelated; }
+    .hud {
+      position: fixed; inset: env(safe-area-inset-top) 0 auto 0; pointer-events: none; padding: 12px 14px;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; text-shadow: 0 2px 4px #000;
+    }
+    .hud-card { min-width: 128px; padding: 10px 12px; background: linear-gradient(180deg, rgba(20,18,29,.74), rgba(6,5,11,.48)); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.35); backdrop-filter: blur(8px); }
+    .brand { font-weight: 900; letter-spacing: .08em; font-size: 12px; color: #fff; }
+    .sub { margin-top: 3px; opacity: .78; font-size: 11px; line-height: 1.25; }
+    .bar { width: 132px; height: 9px; border-radius: 999px; background: rgba(255,255,255,.12); margin-top: 7px; overflow: hidden; border: 1px solid rgba(255,255,255,.10); }
+    .bar > i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #d92036, #ff775f); border-radius: 999px; }
+    #score { text-align: right; }
+    .controls { position: fixed; inset: auto 0 calc(14px + env(safe-area-inset-bottom)) 0; pointer-events: none; }
+    .stick-zone { pointer-events: auto; position: absolute; left: 16px; bottom: 0; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.08), rgba(255,255,255,.025)); border: 1px solid var(--line); box-shadow: inset 0 0 0 2px rgba(255,255,255,.03); touch-action: none; }
+    .stick { position: absolute; left: 50%; top: 50%; width: 62px; height: 62px; margin: -31px 0 0 -31px; border-radius: 50%; background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.38), rgba(180,190,205,.16) 42%, rgba(20,22,29,.75)); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 10px 28px rgba(0,0,0,.45); }
+    .buttons { position: absolute; right: 16px; bottom: 2px; width: 184px; height: 154px; pointer-events: auto; touch-action: none; }
+    .btn { position: absolute; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; color: white; font-weight: 900; display: grid; place-items: center; user-select: none; text-shadow: 0 2px 4px #000; box-shadow: 0 12px 28px rgba(0,0,0,.35); }
+    .btn:active, .btn.active { transform: scale(.96); filter: brightness(1.25); }
+    #attackBtn { right: 8px; bottom: 28px; width: 96px; height: 96px; background: radial-gradient(circle at 35% 28%, #ff6b79, #bd1028 56%, #4e0611); font-size: 18px; }
+    #dashBtn { left: 8px; bottom: 8px; width: 68px; height: 68px; background: radial-gradient(circle at 35% 28%, #95efff, #147a9a 58%, #073044); font-size: 12px; }
+    .hint { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(86vw, 440px); padding: 18px; border-radius: 22px; background: rgba(6,5,10,.78); border: 1px solid var(--line); text-align: center; backdrop-filter: blur(10px); box-shadow: 0 24px 80px rgba(0,0,0,.5); pointer-events: none; transition: opacity .3s ease; }
+    .hint h1 { margin: 0 0 8px; font-size: 25px; letter-spacing: .04em; }
+    .hint p { margin: 6px 0; opacity: .85; font-size: 14px; line-height: 1.35; }
+    .hidden { opacity: 0; }
+    @media (min-width: 900px) { .stick-zone { width: 132px; height: 132px; } .buttons { transform: scale(.92); transform-origin: bottom right; } }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div class="hud">
+    <div class="hud-card">
+      <div class="brand">NIGHT STALKER</div>
+      <div class="sub" id="status">Find phones. Avoid the hunter.</div>
+      <div class="bar"><i id="hpBar"></i></div>
+    </div>
+    <div class="hud-card" id="score">
+      <div class="brand"><span id="found">0</span>/<span id="total">5</span> PHONES</div>
+      <div class="sub">Time <span id="timer">00:00</span> · Combo <span id="combo">0</span></div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="stick-zone" id="stickZone"><div class="stick" id="stick"></div></div>
+    <div class="buttons">
+      <div class="btn" id="dashBtn">DASH</div>
+      <div class="btn" id="attackBtn">SLASH</div>
+    </div>
+  </div>
+  <div class="hint" id="hint">
+    <h1>Prototype Ready</h1>
+    <p>Mobile: drag left joystick, tap SLASH, tap DASH.</p>
+    <p>Desktop: WASD/Arrows, Space attack, Shift dash.</p>
+  </div>
+<script>
+(() => {
+  'use strict';
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  ctx.imageSmoothingEnabled = false;
+
+  const DPR_CAP = 2;
+  let W = 0, H = 0, dpr = 1, scale = 1;
+  let last = performance.now();
+  let elapsed = 0;
+  let shake = 0;
+  let pausedHintTimer = 4;
+
+  const UI = {
+    hp: document.getElementById('hpBar'), found: document.getElementById('found'), total: document.getElementById('total'),
+    timer: document.getElementById('timer'), combo: document.getElementById('combo'), status: document.getElementById('status'), hint: document.getElementById('hint')
+  };
+
+  const keys = new Set();
+  const input = { x: 0, y: 0, attack: false, dash: false, attackQueued: false, dashQueued: false };
+  const stickZone = document.getElementById('stickZone');
+  const stick = document.getElementById('stick');
+  const attackBtn = document.getElementById('attackBtn');
+  const dashBtn = document.getElementById('dashBtn');
+  let stickPointer = null;
+
+  const art = new Image();
+  art.src = 'assets/ghostface-modern-sheet.png';
+  let artReady = false;
+  art.onload = () => { artReady = true; };
+
+  const world = { w: 1600, h: 1000 };
+  const camera = { x: 0, y: 0 };
+  const player = { x: 210, y: 220, r: 18, vx: 0, vy: 0, speed: 185, hp: 100, facing: 1, state: 'idle', frame: 0, animT: 0, atk: 0, dash: 0, inv: 0, combo: 0 };
+  const hunter = { x: 1250, y: 740, r: 22, speed: 112, hp: 999, facing: -1, state: 'stalk', frame: 0, animT: 0, stun: 0, atk: 0 };
+  const phones = [];
+  const obstacles = [];
+  const particles = [];
+
+  function initLevel() {
+    phones.length = 0; obstacles.length = 0; particles.length = 0;
+    const phonePts = [[330,830],[690,190],[880,820],[1240,270],[1430,710]];
+    for (const [x,y] of phonePts) phones.push({ x, y, r: 13, got: false, pulse: Math.random()*10 });
+    const obs = [[480,420,210,56],[950,510,270,62],[230,610,60,260],[1210,130,70,260],[660,690,88,180],[1330,520,220,55]];
+    for (const [x,y,w,h] of obs) obstacles.push({ x,y,w,h });
+    UI.total.textContent = phones.length;
+  }
+
+  function resize() {
+    dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+    W = Math.floor(innerWidth); H = Math.floor(innerHeight);
+    canvas.width = Math.floor(W * dpr); canvas.height = Math.floor(H * dpr);
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    scale = Math.min(W / 420, H / 760) * 1.05;
+  }
+  addEventListener('resize', resize, { passive: true }); resize(); initLevel();
+
+  function bindButton(el, prop, queued) {
+    const down = e => { e.preventDefault(); input[prop] = true; input[queued] = true; el.classList.add('active'); hideHint(); };
+    const up = e => { e.preventDefault(); input[prop] = false; el.classList.remove('active'); };
+    el.addEventListener('pointerdown', down);
+    el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('pointerleave', up);
+  }
+  bindButton(attackBtn, 'attack', 'attackQueued'); bindButton(dashBtn, 'dash', 'dashQueued');
+
+  stickZone.addEventListener('pointerdown', e => { stickPointer = e.pointerId; stickZone.setPointerCapture(stickPointer); updateStick(e); hideHint(); });
+  stickZone.addEventListener('pointermove', e => { if (e.pointerId === stickPointer) updateStick(e); });
+  function releaseStick(e) { if (e.pointerId !== stickPointer) return; stickPointer = null; input.x = input.y = 0; stick.style.transform = 'translate(0px,0px)'; }
+  stickZone.addEventListener('pointerup', releaseStick); stickZone.addEventListener('pointercancel', releaseStick);
+  function updateStick(e) {
+    const b = stickZone.getBoundingClientRect(); const cx = b.left + b.width/2, cy = b.top + b.height/2;
+    let dx = e.clientX - cx, dy = e.clientY - cy; const max = b.width * .31; const len = Math.hypot(dx,dy) || 1;
+    const cl = Math.min(max, len); dx = dx / len * cl; dy = dy / len * cl;
+    stick.style.transform = `translate(${dx}px, ${dy}px)`;
+    input.x = dx / max; input.y = dy / max;
+  }
+
+  addEventListener('keydown', e => { keys.add(e.code); hideHint(); if (e.code === 'Space') input.attackQueued = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.dashQueued = true; });
+  addEventListener('keyup', e => keys.delete(e.code));
+  function keyboardVector() {
+    let x = 0, y = 0;
+    if (keys.has('KeyA') || keys.has('ArrowLeft')) x--;
+    if (keys.has('KeyD') || keys.has('ArrowRight')) x++;
+    if (keys.has('KeyW') || keys.has('ArrowUp')) y--;
+    if (keys.has('KeyS') || keys.has('ArrowDown')) y++;
+    const l = Math.hypot(x,y) || 1;
+    return { x: x/l, y: y/l };
+  }
+  function hideHint() { pausedHintTimer = Math.min(pausedHintTimer, 1.2); }
+
+  function update(dt) {
+    elapsed += dt; pausedHintTimer -= dt; UI.hint.classList.toggle('hidden', pausedHintTimer <= 0);
+    const kv = keyboardVector();
+    let ix = Math.abs(input.x) > .05 || Math.abs(input.y) > .05 ? input.x : kv.x;
+    let iy = Math.abs(input.x) > .05 || Math.abs(input.y) > .05 ? input.y : kv.y;
+    input.attack = input.attack || keys.has('Space'); input.dash = input.dash || keys.has('ShiftLeft') || keys.has('ShiftRight');
+
+    player.inv = Math.max(0, player.inv - dt); player.atk = Math.max(0, player.atk - dt); player.dash = Math.max(0, player.dash - dt);
+    if (input.attackQueued && player.atk <= 0) { player.atk = .34; player.state = 'attack'; slashParticles(player.x + player.facing*28, player.y - 6, player.facing); shake = Math.max(shake, 4); }
+    if (input.dashQueued && player.dash <= 0) { player.dash = .72; player.inv = Math.max(player.inv, .28); burst(player.x, player.y, '#8be8ff', 12); }
+    input.attackQueued = false; input.dashQueued = false;
+
+    const moving = Math.hypot(ix,iy) > .1;
+    if (moving) player.facing = ix >= 0 ? 1 : -1;
+    const sp = player.speed * (player.dash > .48 ? 2.55 : 1) * (player.atk > .12 ? .42 : 1);
+    moveEntity(player, ix * sp * dt, iy * sp * dt);
+    player.state = player.atk > 0 ? 'attack' : moving ? (player.dash > .48 ? 'run' : 'walk') : 'idle';
+
+    for (const ph of phones) if (!ph.got) {
+      ph.pulse += dt;
+      if (dist(player, ph) < player.r + ph.r + 8) { ph.got = true; player.combo++; burst(ph.x, ph.y, '#dfefff', 18); UI.status.textContent = 'Phone found. Keep moving.'; }
+    }
+
+    updateHunter(dt);
+    updateParticles(dt);
+    animate(player, dt); animate(hunter, dt);
+    shake = Math.max(0, shake - dt * 18);
+    updateUI();
+  }
+
+  function updateHunter(dt) {
+    hunter.stun = Math.max(0, hunter.stun - dt); hunter.atk = Math.max(0, hunter.atk - dt);
+    const dx = player.x - hunter.x, dy = player.y - hunter.y, l = Math.hypot(dx,dy) || 1;
+    const seen = l < 560;
+    let speed = hunter.speed + phones.filter(p=>p.got).length * 9;
+    if (hunter.stun <= 0) moveEntity(hunter, dx/l * speed * dt, dy/l * speed * dt);
+    hunter.facing = dx >= 0 ? 1 : -1;
+    hunter.state = hunter.stun > 0 ? 'hurt' : seen ? 'run' : 'walk';
+    if (l < hunter.r + player.r + 8 && player.inv <= 0) {
+      player.hp = Math.max(0, player.hp - 13); player.inv = .85; hunter.atk = .4; shake = 10; burst(player.x, player.y, '#d92036', 14); UI.status.textContent = player.hp <= 0 ? 'Caught. Refresh to restart prototype.' : 'The hunter hit you!';
+    }
+    if (player.atk > .12 && Math.abs(player.x + player.facing*36 - hunter.x) < 54 && Math.abs(player.y - hunter.y) < 48) {
+      hunter.stun = .48; shake = Math.max(shake, 7); burst(hunter.x, hunter.y, '#d92036', 9); player.combo++;
+    }
+  }
+
+  function moveEntity(e, dx, dy) {
+    e.x = clamp(e.x + dx, 24, world.w - 24); resolveObstacles(e, 'x');
+    e.y = clamp(e.y + dy, 30, world.h - 28); resolveObstacles(e, 'y');
+  }
+  function resolveObstacles(e, axis) {
+    for (const o of obstacles) {
+      const nx = clamp(e.x, o.x, o.x+o.w), ny = clamp(e.y, o.y, o.y+o.h);
+      const dx = e.x - nx, dy = e.y - ny; const d2 = dx*dx + dy*dy;
+      if (d2 < e.r*e.r) {
+        const d = Math.sqrt(d2) || 1; const push = e.r - d;
+        if (axis === 'x') e.x += (dx/d) * push; else e.y += (dy/d) * push;
+      }
+    }
+  }
+  function animate(e, dt) { e.animT += dt * (e.state === 'run' ? 12 : e.state === 'attack' ? 16 : 8); e.frame = Math.floor(e.animT) % 6; }
+  function dist(a,b) { return Math.hypot(a.x-b.x, a.y-b.y); }
+  function clamp(v,a,b) { return Math.max(a, Math.min(b, v)); }
+
+  function burst(x,y,color,n) { for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*160,vy:(Math.random()-.5)*160-20,life:.35+Math.random()*.45,color,size:2+Math.random()*4}); }
+  function slashParticles(x,y,dir) { for(let i=0;i<16;i++) particles.push({x,y,vx:dir*(80+Math.random()*210),vy:-90+Math.random()*180,life:.18+Math.random()*.25,color:i%3?'#dfefff':'#d92036',size:2+Math.random()*3}); }
+  function updateParticles(dt) { for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=180*dt; if(p.life<=0) particles.splice(i,1); } }
+  function updateUI() {
+    UI.hp.style.width = player.hp + '%'; UI.found.textContent = phones.filter(p=>p.got).length; UI.combo.textContent = player.combo;
+    const t = Math.floor(elapsed); UI.timer.textContent = String(Math.floor(t/60)).padStart(2,'0') + ':' + String(t%60).padStart(2,'0');
+    if (phones.every(p=>p.got)) UI.status.textContent = 'Prototype win: all phones recovered.';
+  }
+
+  function draw() {
+    const now = performance.now(); const dt = Math.min(.033, (now-last)/1000); last = now;
+    if (player.hp > 0) update(dt);
+    render(); requestAnimationFrame(draw);
+  }
+
+  function render() {
+    const sx = shake ? (Math.random()-.5)*shake : 0, sy = shake ? (Math.random()-.5)*shake : 0;
+    camera.x = clamp(player.x - W/(2*scale), 0, world.w - W/scale); camera.y = clamp(player.y - H/(2*scale), 0, world.h - H/scale);
+    ctx.save(); ctx.clearRect(0,0,W,H); ctx.fillStyle = '#07060b'; ctx.fillRect(0,0,W,H);
+    ctx.translate(sx, sy); ctx.scale(scale, scale); ctx.translate(-camera.x, -camera.y);
+    drawWorld(); drawPhones(); drawEntity(hunter, false); drawEntity(player, true); drawParticles(); ctx.restore(); drawVignette();
+  }
+  function drawWorld() {
+    const g = ctx.createLinearGradient(0,0,world.w,world.h); g.addColorStop(0,'#11101a'); g.addColorStop(.55,'#07080d'); g.addColorStop(1,'#181016'); ctx.fillStyle = g; ctx.fillRect(0,0,world.w,world.h);
+    ctx.strokeStyle = 'rgba(255,255,255,.035)'; ctx.lineWidth = 1;
+    for(let x=0;x<world.w;x+=64){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,world.h); ctx.stroke(); }
+    for(let y=0;y<world.h;y+=64){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(world.w,y); ctx.stroke(); }
+    for (const o of obstacles) { ctx.fillStyle = '#171620'; ctx.fillRect(o.x,o.y,o.w,o.h); ctx.fillStyle = 'rgba(255,255,255,.045)'; ctx.fillRect(o.x,o.y,o.w,5); ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.strokeRect(o.x+.5,o.y+.5,o.w-1,o.h-1); }
+    for (let i=0;i<70;i++) { const x=(i*283)%world.w, y=(i*151)%world.h; ctx.fillStyle = i%5===0 ? 'rgba(200,20,45,.15)' : 'rgba(255,255,255,.035)'; ctx.fillRect(x,y,2,2); }
+  }
+  function drawPhones() {
+    for (const p of phones) if(!p.got) { const pulse = 1 + Math.sin(p.pulse*5)*.12; ctx.save(); ctx.translate(p.x,p.y); ctx.scale(pulse,pulse); ctx.fillStyle='#0b0d12'; roundRect(-8,-12,16,24,4,true); ctx.fillStyle='#8be8ff'; ctx.fillRect(-5,-8,10,14); ctx.fillStyle='rgba(139,232,255,.16)'; ctx.beginPath(); ctx.arc(0,0,27,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+  }
+  function drawEntity(e, isPlayer) {
+    ctx.save(); ctx.translate(e.x, e.y); if (e.facing < 0) ctx.scale(-1,1);
+    if (isPlayer && e.inv > 0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=.45;
+    drawSpriteLike(e.state, e.frame, isPlayer ? 1 : .92);
+    ctx.restore();
+    if (isPlayer && e.atk > .12) { ctx.save(); ctx.translate(e.x + e.facing*34, e.y-4); ctx.scale(e.facing,1); ctx.strokeStyle='rgba(220,245,255,.75)'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(0,0,38,-.8,.65); ctx.stroke(); ctx.strokeStyle='rgba(217,32,54,.8)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(4,2,32,-.5,.55); ctx.stroke(); ctx.restore(); }
+  }
+  function drawSpriteLike(state, frame, s) {
+    // Draw from source sprite sheet when loaded, but fall back to crisp vector-pixel proxy.
+    if (artReady) {
+      const rows = { idle:0, walk:1, run:2, attack:3, hurt:5, stalk:1 };
+      const row = rows[state] ?? 0;
+      const sw = art.width/6, sh = art.height/6;
+      ctx.drawImage(art, Math.floor((frame%6)*sw), Math.floor(row*sh), Math.floor(sw), Math.floor(sh), -38*s, -72*s, 76*s, 76*s);
+      return;
+    }
+    ctx.fillStyle='#07070a'; roundRect(-19,-50,38,58,12,true); ctx.fillStyle='#eceee8'; roundRect(-8,-58,16,28,8,true); ctx.fillStyle='#08080a'; ctx.fillRect(-5,-48,3,7); ctx.fillRect(4,-48,3,7); ctx.fillRect(-3,-38,6,11); ctx.fillStyle='#6b3f22'; ctx.fillRect(-14,5,12,7); ctx.fillRect(4,5,13,7);
+  }
+  function drawParticles() { for(const p of particles){ ctx.globalAlpha = Math.max(0,p.life*2); ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.size,p.size); } ctx.globalAlpha=1; }
+  function drawVignette() {
+    const rg = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.18,W/2,H/2,Math.max(W,H)*.72); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(.7,'rgba(0,0,0,.25)'); rg.addColorStop(1,'rgba(0,0,0,.82)'); ctx.fillStyle=rg; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(217,32,54,.06)'; ctx.fillRect(0,0,W,H);
+  }
+  function roundRect(x,y,w,h,r,fill) { ctx.beginPath(); ctx.roundRect(x,y,w,h,r); if(fill) ctx.fill(); else ctx.stroke(); }
+
+  requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
