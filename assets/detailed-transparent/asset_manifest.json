@@ -1,0 +1,101 @@
+{
+  "format": "PNG RGBA, transparent background from initial render (no chroma key/cutout pass)",
+  "filtering": "Use nearest-neighbor / image-rendering: pixelated. Disable smoothing.",
+  "assets": {
+    "ghostface": {
+      "file": "ghostface_detailed_96x96.png",
+      "cell": {
+        "w": 96,
+        "h": 96
+      },
+      "frames": 4,
+      "pivot": {
+        "x": 48,
+        "y": 76
+      },
+      "animations": {
+        "idle_walk": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "notes": "Detailed black robe, white mask, visible boots, raised knife."
+    },
+    "ghostface_attack": {
+      "file": "ghostface_detailed_attack_96x96.png",
+      "cell": {
+        "w": 96,
+        "h": 96
+      },
+      "frames": 4,
+      "pivot": {
+        "x": 48,
+        "y": 76
+      },
+      "animations": {
+        "slash": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    "guard": {
+      "file": "guard_detailed_80x80.png",
+      "cell": {
+        "w": 80,
+        "h": 80
+      },
+      "frames": 4,
+      "pivot": {
+        "x": 40,
+        "y": 68
+      },
+      "animations": {
+        "walk": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "notes": "Guard/hunter with flashlight cone baked as translucent alpha."
+    },
+    "phone": {
+      "file": "phone_detailed_32x32.png",
+      "cell": {
+        "w": 32,
+        "h": 32
+      },
+      "frames": 3,
+      "pivot": {
+        "x": 16,
+        "y": 16
+      },
+      "animations": {
+        "pulse": [
+          0,
+          1,
+          2
+        ]
+      }
+    },
+    "walls": {
+      "file": "wall_tiles_detailed_64x64.png",
+      "cell": {
+        "w": 64,
+        "h": 64
+      },
+      "frames": 4,
+      "pivot": {
+        "x": 0,
+        "y": 0
+      },
+      "usage": "Tile/fill obstacle rectangles; variants include scratches/stains.",
+      "notes": "Native RGBA wall tiles with transparent 2px outer margin; game fills obstacle base under tiles to prevent seams."
+    }
+  }
+}

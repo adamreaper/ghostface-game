@@ -99,10 +99,21 @@
   const dashBtn = document.getElementById('dashBtn');
   let stickPointer = null;
 
-  const art = new Image();
-  art.src = 'assets/ghostface-modern-sheet-cutout.png';
-  let artReady = false;
-  art.onload = () => { artReady = true; };
+  const spriteAssets = {
+    ghost: loadSprite('assets/detailed-transparent/ghostface_detailed_96x96.png', 96, 96, 4),
+    ghostAttack: loadSprite('assets/detailed-transparent/ghostface_detailed_attack_96x96.png', 96, 96, 4),
+    guard: loadSprite('assets/detailed-transparent/guard_detailed_80x80.png', 80, 80, 4),
+    phone: loadSprite('assets/detailed-transparent/phone_detailed_32x32.png', 32, 32, 3),
+    wall: loadSprite('assets/detailed-transparent/wall_tiles_detailed_64x64.png', 64, 64, 4)
+  };
+
+  function loadSprite(src, cellW, cellH, frames) {
+    const img = new Image();
+    const sheet = { img, cellW, cellH, frames, ready: false };
+    img.onload = () => { sheet.ready = true; };
+    img.src = src;
+    return sheet;
+  }
 
   const world = { w: 1600, h: 1000 };
   const camera = { x: 0, y: 0 };
@@ -287,11 +298,23 @@
     ctx.strokeStyle = 'rgba(255,255,255,.035)'; ctx.lineWidth = 1;
     for(let x=0;x<world.w;x+=64){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,world.h); ctx.stroke(); }
     for(let y=0;y<world.h;y+=64){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(world.w,y); ctx.stroke(); }
-    for (const o of obstacles) { ctx.fillStyle = '#171620'; ctx.fillRect(o.x,o.y,o.w,o.h); ctx.fillStyle = 'rgba(255,255,255,.045)'; ctx.fillRect(o.x,o.y,o.w,5); ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.strokeRect(o.x+.5,o.y+.5,o.w-1,o.h-1); }
+    for (let i=0;i<obstacles.length;i++) drawWallObstacle(obstacles[i], i);
     for (let i=0;i<70;i++) { const x=(i*283)%world.w, y=(i*151)%world.h; ctx.fillStyle = i%5===0 ? 'rgba(200,20,45,.15)' : 'rgba(255,255,255,.035)'; ctx.fillRect(x,y,2,2); }
   }
+  function drawWallObstacle(o, variant) {
+    const sheet = spriteAssets.wall;
+    ctx.fillStyle = '#171620'; ctx.fillRect(o.x,o.y,o.w,o.h);
+    if (!sheet.ready) { ctx.fillStyle = 'rgba(255,255,255,.045)'; ctx.fillRect(o.x,o.y, o.w,5); return; }
+    ctx.save(); ctx.beginPath(); ctx.rect(o.x,o.y,o.w,o.h); ctx.clip();
+    for (let y=o.y; y<o.y+o.h; y+=sheet.cellH) {
+      for (let x=o.x; x<o.x+o.w; x+=sheet.cellW) drawAtlasFrame(sheet, (variant + Math.floor(x/64) + Math.floor(y/64)) % sheet.frames, x, y, sheet.cellW, sheet.cellH);
+    }
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(255,255,255,.10)'; ctx.strokeRect(o.x+.5,o.y+.5,o.w-1,o.h-1);
+  }
   function drawPhones() {
-    for (const p of phones) if(!p.got) { const pulse = 1 + Math.sin(p.pulse*5)*.12; ctx.save(); ctx.translate(p.x,p.y); ctx.scale(pulse,pulse); ctx.fillStyle='#0b0d12'; roundRect(-8,-12,16,24,4,true); ctx.fillStyle='#8be8ff'; ctx.fillRect(-5,-8,10,14); ctx.fillStyle='rgba(139,232,255,.16)'; ctx.beginPath(); ctx.arc(0,0,27,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+    const sheet = spriteAssets.phone;
+    for (const p of phones) if(!p.got) { const pulse = 1 + Math.sin(p.pulse*5)*.12; const frame = Math.floor(p.pulse*8) % sheet.frames; ctx.save(); ctx.translate(p.x,p.y); ctx.scale(pulse,pulse); if (sheet.ready) drawAtlasFrame(sheet, frame, -16, -16, 32, 32); else { ctx.fillStyle='#0b0d12'; roundRect(-8,-12,16,24,4,true); ctx.fillStyle='#8be8ff'; ctx.fillRect(-5,-8,10,14); } ctx.restore(); }
   }
   function drawEntity(e, isPlayer) {
     ctx.save(); ctx.translate(e.x, e.y); if (e.facing < 0) ctx.scale(-1,1);
@@ -301,9 +324,19 @@
     if (isPlayer && e.atk > .12) { ctx.save(); ctx.translate(e.x + e.facing*34, e.y-4); ctx.scale(e.facing,1); ctx.strokeStyle='rgba(220,245,255,.75)'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(0,0,38,-.8,.65); ctx.stroke(); ctx.strokeStyle='rgba(217,32,54,.8)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(4,2,32,-.5,.55); ctx.stroke(); ctx.restore(); }
   }
   function drawSpriteLike(state, frame, s, isPlayer) {
-    // Clean procedural pixel-art sprites are used for gameplay so there are no atlas boxes/fringes.
-    // The generated sprite sheet remains in assets as concept/reference art.
+    const sheet = isPlayer ? (state === 'attack' ? spriteAssets.ghostAttack : spriteAssets.ghost) : spriteAssets.guard;
+    if (sheet.ready) {
+      const idx = Math.floor(frame) % sheet.frames;
+      const outW = sheet.cellW * s;
+      const outH = sheet.cellH * s;
+      drawAtlasFrame(sheet, idx, -outW / 2, isPlayer ? -76 * s : -68 * s, outW, outH);
+      return;
+    }
+    // Fallback while images load; the shipped assets are transparent RGBA PNGs.
     if (isPlayer) drawGhostfaceSprite(state, frame, s); else drawGuardSprite(state, frame, s);
+  }
+  function drawAtlasFrame(sheet, frame, dx, dy, dw, dh) {
+    ctx.drawImage(sheet.img, frame * sheet.cellW, 0, sheet.cellW, sheet.cellH, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
   }
   function px(x,y,w,h,color) { ctx.fillStyle=color; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
   function drawGhostfaceSprite(state, frame, s) {
