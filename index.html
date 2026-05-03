@@ -296,20 +296,69 @@
   function drawEntity(e, isPlayer) {
     ctx.save(); ctx.translate(e.x, e.y); if (e.facing < 0) ctx.scale(-1,1);
     if (isPlayer && e.inv > 0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=.45;
-    drawSpriteLike(e.state, e.frame, isPlayer ? 1 : .92);
+    drawSpriteLike(e.state, e.frame, isPlayer ? 1 : .94, isPlayer);
     ctx.restore();
     if (isPlayer && e.atk > .12) { ctx.save(); ctx.translate(e.x + e.facing*34, e.y-4); ctx.scale(e.facing,1); ctx.strokeStyle='rgba(220,245,255,.75)'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(0,0,38,-.8,.65); ctx.stroke(); ctx.strokeStyle='rgba(217,32,54,.8)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(4,2,32,-.5,.55); ctx.stroke(); ctx.restore(); }
   }
-  function drawSpriteLike(state, frame, s) {
-    // Draw from source sprite sheet when loaded, but fall back to crisp vector-pixel proxy.
-    if (artReady) {
-      const rows = { idle:0, walk:1, run:2, attack:3, hurt:5, stalk:1 };
-      const row = rows[state] ?? 0;
-      const sw = art.width/6, sh = art.height/6;
-      ctx.drawImage(art, Math.floor((frame%6)*sw), Math.floor(row*sh), Math.floor(sw), Math.floor(sh), -38*s, -72*s, 76*s, 76*s);
-      return;
-    }
-    ctx.fillStyle='#07070a'; roundRect(-19,-50,38,58,12,true); ctx.fillStyle='#eceee8'; roundRect(-8,-58,16,28,8,true); ctx.fillStyle='#08080a'; ctx.fillRect(-5,-48,3,7); ctx.fillRect(4,-48,3,7); ctx.fillRect(-3,-38,6,11); ctx.fillStyle='#6b3f22'; ctx.fillRect(-14,5,12,7); ctx.fillRect(4,5,13,7);
+  function drawSpriteLike(state, frame, s, isPlayer) {
+    // Clean procedural pixel-art sprites are used for gameplay so there are no atlas boxes/fringes.
+    // The generated sprite sheet remains in assets as concept/reference art.
+    if (isPlayer) drawGhostfaceSprite(state, frame, s); else drawGuardSprite(state, frame, s);
+  }
+  function px(x,y,w,h,color) { ctx.fillStyle=color; ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
+  function drawGhostfaceSprite(state, frame, s) {
+    ctx.save(); ctx.scale(s,s);
+    const bob = state === 'idle' ? Math.sin(elapsed*5)*1.5 : Math.sin(frame*.9)*2;
+    const attack = state === 'attack';
+    const run = state === 'run';
+    const lean = attack ? 7 : run ? 5 : state === 'walk' ? 2 : 0;
+    const step = Math.sin(frame * Math.PI / 3) * (run ? 6 : 4);
+    ctx.globalAlpha *= .35; ctx.fillStyle='rgba(0,0,0,.75)'; ctx.beginPath(); ctx.ellipse(0, 12, 26, 9, 0, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha /= .35;
+    // Boots first so they peek out from the robe.
+    px(-13 + step, 4, 12, 7, '#6f421f'); px(-9 + step, 3, 8, 3, '#a86a32');
+    px(7 - step, 4, 13, 7, '#6f421f'); px(10 - step, 3, 8, 3, '#a86a32');
+    // Flowing robe with jagged hem, inspired by the reference pose.
+    ctx.fillStyle='#08080c'; ctx.beginPath();
+    ctx.moveTo(-18+lean, -43+bob); ctx.lineTo(14+lean, -44+bob); ctx.lineTo(28+lean, -20+bob);
+    ctx.lineTo(25, 7); ctx.lineTo(16, 2); ctx.lineTo(8, 10); ctx.lineTo(0, 4); ctx.lineTo(-9, 11); ctx.lineTo(-18, 3); ctx.lineTo(-29, 8); ctx.lineTo(-24, -16+bob); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#1d1d2a'; ctx.beginPath(); ctx.moveTo(-8+lean,-31+bob); ctx.lineTo(10+lean,-31+bob); ctx.lineTo(16,2); ctx.lineTo(4,6); ctx.lineTo(-8,2); ctx.closePath(); ctx.fill();
+    px(10+lean,-30+bob,3,31,'#3d3a4f'); px(-15+lean,-24+bob,4,23,'#12121a');
+    // Hood taper and mask.
+    ctx.fillStyle='#050509'; ctx.beginPath(); ctx.moveTo(-19+lean,-54+bob); ctx.lineTo(13+lean,-56+bob); ctx.lineTo(31+lean,-41+bob); ctx.lineTo(12+lean,-24+bob); ctx.lineTo(-19+lean,-25+bob); ctx.lineTo(-30+lean,-42+bob); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#0d0d14'; ctx.beginPath(); ctx.moveTo(6+lean,-56+bob); ctx.lineTo(34+lean,-64+bob); ctx.lineTo(20+lean,-40+bob); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#f2f2ea'; roundRect(-7+lean,-51+bob,18,31,8,true); px(-4+lean,-39+bob,12,18,'#f2f2ea');
+    px(-3+lean,-43+bob,4,8,'#020204'); px(6+lean,-43+bob,4,8,'#020204'); px(1+lean,-31+bob,6,13,'#020204');
+    px(-6+lean,-28+bob,2,9,'#bfc2ba'); px(10+lean,-28+bob,2,8,'#bfc2ba');
+    // Arms and knife.
+    ctx.lineWidth=7; ctx.strokeStyle='#050509'; ctx.beginPath();
+    if (attack) { ctx.moveTo(11+lean,-30+bob); ctx.lineTo(32+lean,-11+bob); }
+    else { ctx.moveTo(9+lean,-31+bob); ctx.lineTo(22+lean,-61+bob); }
+    ctx.stroke();
+    ctx.lineWidth=4; ctx.strokeStyle='#242436'; ctx.stroke();
+    ctx.lineWidth=5; ctx.strokeStyle='#050509'; ctx.beginPath(); ctx.moveTo(-10+lean,-27+bob); ctx.lineTo(2+lean,-16+bob); ctx.stroke();
+    ctx.fillStyle='#20202d'; ctx.fillRect(-1+lean,-20+bob,7,6);
+    if (attack) drawKnife(33+lean,-12+bob,'down'); else drawKnife(22+lean,-62+bob,'up');
+    ctx.restore();
+  }
+  function drawKnife(x,y,dir) {
+    px(x-2,y,4,8,'#101015');
+    ctx.fillStyle='#dff7ff'; ctx.beginPath();
+    if (dir === 'down') { ctx.moveTo(x+2,y+5); ctx.lineTo(x+26,y+24); ctx.lineTo(x+26,y+30); ctx.lineTo(x+5,y+10); }
+    else { ctx.moveTo(x-3,y); ctx.lineTo(x+1,y-23); ctx.lineTo(x+6,y); ctx.lineTo(x+1,y+4); }
+    ctx.closePath(); ctx.fill(); ctx.strokeStyle='#69b7db'; ctx.lineWidth=1; ctx.stroke();
+  }
+  function drawGuardSprite(state, frame, s) {
+    ctx.save(); ctx.scale(s,s);
+    const run = state === 'run'; const bob = Math.sin(frame*.9) * (run ? 2.5 : 1.5); const step = Math.sin(frame*Math.PI/3) * (run ? 6 : 3);
+    ctx.globalAlpha *= .3; ctx.fillStyle='rgba(0,0,0,.75)'; ctx.beginPath(); ctx.ellipse(0, 13, 22, 8, 0, 0, Math.PI*2); ctx.fill(); ctx.globalAlpha /= .3;
+    px(-10+step,3,7,11,'#1b2535'); px(6-step,3,7,11,'#1b2535'); px(-13+step,12,12,5,'#111'); px(4-step,12,13,5,'#111');
+    px(-15,-33+bob,30,39,'#29364d'); px(-12,-30+bob,24,8,'#51617d'); px(-8,-47+bob,16,16,'#c89468');
+    px(-11,-54+bob,22,10,'#1b1d28'); px(-7,-43+bob,4,3,'#121212'); px(5,-43+bob,4,3,'#121212');
+    ctx.strokeStyle='#1b2535'; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(11,-27+bob); ctx.lineTo(24,-20+bob); ctx.stroke();
+    ctx.fillStyle='rgba(255,242,150,.28)'; ctx.beginPath(); ctx.moveTo(25,-21+bob); ctx.lineTo(92,-44+bob); ctx.lineTo(92,1+bob); ctx.closePath(); ctx.fill();
+    px(22,-24+bob,8,6,'#f6e58a');
+    ctx.strokeStyle='#1b2535'; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(-11,-27+bob); ctx.lineTo(-19,-16+bob); ctx.stroke();
+    ctx.restore();
   }
   function drawParticles() { for(const p of particles){ ctx.globalAlpha = Math.max(0,p.life*2); ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,p.size,p.size); } ctx.globalAlpha=1; }
   function drawVignette() {
@@ -325,7 +374,12 @@
     ctx.fillStyle = '#ff6b79'; ctx.font = '800 15px Inter, system-ui, sans-serif'; ctx.fillText(`Restarting in ${seconds}...`, W/2, H/2 + 14);
     ctx.restore();
   }
-  function roundRect(x,y,w,h,r,fill) { ctx.beginPath(); ctx.roundRect(x,y,w,h,r); if(fill) ctx.fill(); else ctx.stroke(); }
+  function roundRect(x,y,w,h,r,fill) {
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x,y,w,h,r);
+    else { ctx.rect(x,y,w,h); }
+    if(fill) ctx.fill(); else ctx.stroke();
+  }
 
   requestAnimationFrame(draw);
 })();

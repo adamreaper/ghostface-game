@@ -35,8 +35,8 @@ Collect all 5 phones while avoiding the hunter. Slashing can briefly stun the hu
 
 ## Files
 
-- `index.html` — single-page game prototype
-- `assets/ghostface-modern-sheet-cutout.png` — transparent cutout sprite sheet used by the game
+- `index.html` — single-page game prototype with clean built-in pixel-art gameplay sprites
+- `assets/ghostface-modern-sheet-cutout.png` — transparent cutout concept/reference sprite sheet
 - `assets/ghostface-modern-sheet.png` — original generated sprite sheet source/reference
 
 ## Notes
