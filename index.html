@@ -55,8 +55,8 @@
       <div class="bar"><i id="hpBar"></i></div>
     </div>
     <div class="hud-card" id="score">
-      <div class="brand"><span id="found">0</span>/<span id="total">5</span> PHONES</div>
-      <div class="sub">Time <span id="timer">00:00</span> · Combo <span id="combo">0</span></div>
+      <div class="brand">LEVEL <span id="level">1</span> · <span id="found">0</span>/<span id="total">5</span> PHONES</div>
+      <div class="sub">Time <span id="timer">00:00</span> · Combo <span id="combo">0</span> · Enemies <span id="enemyCount">1</span></div>
     </div>
   </div>
   <div class="controls">
@@ -85,10 +85,13 @@
   let shake = 0;
   let pausedHintTimer = 4;
   let gameOverTimer = 0;
+  let level = 1;
+  let levelClearTimer = 0;
 
   const UI = {
     hp: document.getElementById('hpBar'), found: document.getElementById('found'), total: document.getElementById('total'),
-    timer: document.getElementById('timer'), combo: document.getElementById('combo'), status: document.getElementById('status'), hint: document.getElementById('hint')
+    timer: document.getElementById('timer'), combo: document.getElementById('combo'), status: document.getElementById('status'), hint: document.getElementById('hint'),
+    level: document.getElementById('level'), enemyCount: document.getElementById('enemyCount')
   };
 
   const keys = new Set();
@@ -118,24 +121,58 @@
   const world = { w: 1600, h: 1000 };
   const camera = { x: 0, y: 0 };
   const player = { x: 210, y: 220, r: 18, vx: 0, vy: 0, speed: 185, hp: 100, facing: 1, state: 'idle', frame: 0, animT: 0, atk: 0, dash: 0, inv: 0, combo: 0 };
-  const hunter = { x: 1250, y: 740, r: 22, speed: 112, hp: 999, facing: -1, state: 'stalk', frame: 0, animT: 0, stun: 0, atk: 0 };
+  const enemies = [];
   const phones = [];
   const obstacles = [];
   const particles = [];
 
-  function initLevel() {
-    phones.length = 0; obstacles.length = 0; particles.length = 0;
-    Object.assign(player, { x: 210, y: 220, vx: 0, vy: 0, hp: 100, facing: 1, state: 'idle', frame: 0, animT: 0, atk: 0, dash: 0, inv: 1.1, combo: 0 });
-    Object.assign(hunter, { x: 1250, y: 740, hp: 999, facing: -1, state: 'stalk', frame: 0, animT: 0, stun: 0, atk: 0 });
-    gameOverTimer = 0;
-    shake = 0;
-    const phonePts = [[330,830],[690,190],[880,820],[1240,270],[1430,710]];
-    for (const [x,y] of phonePts) phones.push({ x, y, r: 13, got: false, pulse: Math.random()*10 });
+  function restartRun() {
+    level = 1;
+    elapsed = 0;
+    player.combo = 0;
+    initLevel(true);
+  }
+
+  function initLevel(fullHeal = false) {
+    phones.length = 0; enemies.length = 0; obstacles.length = 0; particles.length = 0;
+    const start = { x: 210, y: 220 };
+    Object.assign(player, { x: start.x, y: start.y, vx: 0, vy: 0, hp: fullHeal ? 100 : Math.min(100, player.hp + 18), facing: 1, state: 'idle', frame: 0, animT: 0, atk: 0, dash: 0, inv: 1.1 });
+    gameOverTimer = 0; levelClearTimer = 0; shake = 0;
+
     const obs = [[480,420,210,56],[950,510,270,62],[230,610,60,260],[1210,130,70,260],[660,690,88,180],[1330,520,220,55]];
     for (const [x,y,w,h] of obs) obstacles.push({ x,y,w,h });
+
+    const phoneCount = Math.min(5 + level - 1, 18);
+    const enemyCount = Math.min(1 + Math.floor((level - 1) / 2), 8);
+    for (let i=0;i<phoneCount;i++) {
+      const pt = spawnPoint(i + 2, 90);
+      phones.push({ x: pt.x, y: pt.y, r: 13, got: false, pulse: (i * .73) % 10 });
+    }
+    for (let i=0;i<enemyCount;i++) enemies.push(makeEnemy(i));
     UI.total.textContent = phones.length;
-    UI.status.textContent = 'Find phones. Avoid the hunter.';
+    UI.status.textContent = `Level ${level}: collect ${phones.length} phones. Avoid the hunters.`;
     updateUI();
+  }
+
+  function makeEnemy(i) {
+    const pt = spawnPoint(i + 30, 120);
+    const maxHp = 70 + level * 12;
+    return { x: pt.x, y: pt.y, r: 22, speed: 104 + level * 5 + i * 4, maxHp, hp: maxHp, facing: pt.x < player.x ? 1 : -1, state: 'stalk', frame: 0, animT: i * .37, stun: 0, atk: 0, dead: false, hitFlash: 0 };
+  }
+
+  function spawnPoint(i, margin = 80) {
+    const x = margin + ((i * 397 + level * 131) % Math.max(1, world.w - margin * 2));
+    const y = margin + ((i * 223 + level * 179) % Math.max(1, world.h - margin * 2));
+    if (Math.hypot(x - player.x, y - player.y) < 180) return { x: world.w - x, y: world.h - y };
+    return { x, y };
+  }
+
+  function advanceLevel() {
+    level++;
+    player.combo += 5;
+    UI.status.textContent = `Level ${level - 1} cleared. More phones. More hunters.`;
+    burst(player.x, player.y, '#8be8ff', 34);
+    initLevel(false);
   }
 
   function triggerGameOver() {
@@ -159,7 +196,7 @@
     ctx.imageSmoothingEnabled = false;
     scale = Math.min(W / 420, H / 760) * 1.05;
   }
-  addEventListener('resize', resize, { passive: true }); resize(); initLevel();
+  addEventListener('resize', resize, { passive: true }); resize(); restartRun();
 
   function bindButton(el, prop, queued) {
     const down = e => { e.preventDefault(); input[prop] = true; input[queued] = true; el.classList.add('active'); hideHint(); };
@@ -217,27 +254,33 @@
       if (dist(player, ph) < player.r + ph.r + 8) { ph.got = true; player.combo++; burst(ph.x, ph.y, '#dfefff', 18); UI.status.textContent = 'Phone found. Keep moving.'; }
     }
 
-    updateHunter(dt);
+    updateEnemies(dt);
+    if (phones.every(p=>p.got) && levelClearTimer <= 0) levelClearTimer = .8;
+    if (levelClearTimer > 0) { levelClearTimer -= dt; if (levelClearTimer <= 0) advanceLevel(); }
     updateParticles(dt);
-    animate(player, dt); animate(hunter, dt);
+    animate(player, dt); for (const e of enemies) animate(e, dt);
     shake = Math.max(0, shake - dt * 18);
     updateUI();
   }
 
-  function updateHunter(dt) {
-    hunter.stun = Math.max(0, hunter.stun - dt); hunter.atk = Math.max(0, hunter.atk - dt);
-    const dx = player.x - hunter.x, dy = player.y - hunter.y, l = Math.hypot(dx,dy) || 1;
-    const seen = l < 560;
-    let speed = hunter.speed + phones.filter(p=>p.got).length * 9;
-    if (hunter.stun <= 0) moveEntity(hunter, dx/l * speed * dt, dy/l * speed * dt);
-    hunter.facing = dx >= 0 ? 1 : -1;
-    hunter.state = hunter.stun > 0 ? 'hurt' : seen ? 'run' : 'walk';
-    if (l < hunter.r + player.r + 8 && player.inv <= 0) {
-      player.hp = Math.max(0, player.hp - 13); player.inv = .85; hunter.atk = .4; shake = 10; burst(player.x, player.y, '#d92036', 14);
-      if (player.hp <= 0) triggerGameOver(); else UI.status.textContent = 'The hunter hit you!';
-    }
-    if (player.atk > .12 && Math.abs(player.x + player.facing*36 - hunter.x) < 54 && Math.abs(player.y - hunter.y) < 48) {
-      hunter.stun = .48; shake = Math.max(shake, 7); burst(hunter.x, hunter.y, '#d92036', 9); player.combo++;
+  function updateEnemies(dt) {
+    for (const e of enemies) {
+      if (e.dead) continue;
+      e.stun = Math.max(0, e.stun - dt); e.atk = Math.max(0, e.atk - dt); e.hitFlash = Math.max(0, e.hitFlash - dt);
+      const dx = player.x - e.x, dy = player.y - e.y, l = Math.hypot(dx,dy) || 1;
+      const seen = l < 520 + level * 16;
+      const speed = e.speed + phones.filter(p=>p.got).length * 4;
+      if (e.stun <= 0) moveEntity(e, dx/l * speed * dt, dy/l * speed * dt);
+      e.facing = dx >= 0 ? 1 : -1;
+      e.state = e.stun > 0 ? 'hurt' : seen ? 'run' : 'walk';
+      if (l < e.r + player.r + 8 && player.inv <= 0) {
+        player.hp = Math.max(0, player.hp - Math.min(22, 11 + level)); player.inv = .85; e.atk = .4; shake = 10; burst(player.x, player.y, '#d92036', 14);
+        if (player.hp <= 0) triggerGameOver(); else UI.status.textContent = 'A hunter hit you!';
+      }
+      if (player.atk > .12 && Math.abs(player.x + player.facing*36 - e.x) < 58 && Math.abs(player.y - e.y) < 50) {
+        e.hp = Math.max(0, e.hp - 26); e.stun = .65; e.hitFlash = .18; shake = Math.max(shake, 7); burst(e.x, e.y, '#d92036', 9); player.combo++;
+        if (e.hp <= 0) { e.dead = true; burst(e.x, e.y, '#dfefff', 18); UI.status.textContent = 'Hunter down. Keep collecting.'; }
+      }
     }
   }
 
@@ -263,21 +306,21 @@
   function slashParticles(x,y,dir) { for(let i=0;i<16;i++) particles.push({x,y,vx:dir*(80+Math.random()*210),vy:-90+Math.random()*180,life:.18+Math.random()*.25,color:i%3?'#dfefff':'#d92036',size:2+Math.random()*3}); }
   function updateParticles(dt) { for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=180*dt; if(p.life<=0) particles.splice(i,1); } }
   function updateUI() {
-    UI.hp.style.width = player.hp + '%'; UI.found.textContent = phones.filter(p=>p.got).length; UI.combo.textContent = player.combo;
+    UI.hp.style.width = player.hp + '%'; UI.found.textContent = phones.filter(p=>p.got).length; UI.combo.textContent = player.combo; UI.level.textContent = level; UI.enemyCount.textContent = enemies.filter(e=>!e.dead).length;
     const t = Math.floor(elapsed); UI.timer.textContent = String(Math.floor(t/60)).padStart(2,'0') + ':' + String(t%60).padStart(2,'0');
-    if (phones.every(p=>p.got)) UI.status.textContent = 'Prototype win: all phones recovered.';
+    if (phones.every(p=>p.got) && levelClearTimer > 0) UI.status.textContent = `Level ${level} clear! Next wave incoming...`;
   }
 
   function updateGameOver(dt) {
     gameOverTimer = Math.max(0, gameOverTimer - dt);
     updateParticles(dt);
     animate(player, dt);
-    animate(hunter, dt);
+    for (const e of enemies) animate(e, dt);
     shake = Math.max(0, shake - dt * 18);
     const seconds = Math.ceil(gameOverTimer);
     UI.status.textContent = seconds > 0 ? `Caught. Restarting in ${seconds}...` : 'Restarting...';
     updateUI();
-    if (gameOverTimer <= 0) initLevel();
+    if (gameOverTimer <= 0) restartRun();
   }
 
   function draw() {
@@ -291,7 +334,7 @@
     camera.x = clamp(player.x - W/(2*scale), 0, world.w - W/scale); camera.y = clamp(player.y - H/(2*scale), 0, world.h - H/scale);
     ctx.save(); ctx.clearRect(0,0,W,H); ctx.fillStyle = '#07060b'; ctx.fillRect(0,0,W,H);
     ctx.translate(sx, sy); ctx.scale(scale, scale); ctx.translate(-camera.x, -camera.y);
-    drawWorld(); drawPhones(); drawEntity(hunter, false); drawEntity(player, true); drawParticles(); ctx.restore(); drawVignette(); if (player.hp <= 0) drawGameOverOverlay();
+    drawWorld(); drawPhones(); for (const e of enemies) if (!e.dead) { drawEntity(e, false); drawEnemyHealthBar(e); } drawEntity(player, true); drawParticles(); ctx.restore(); drawVignette(); if (player.hp <= 0) drawGameOverOverlay();
   }
   function drawWorld() {
     const g = ctx.createLinearGradient(0,0,world.w,world.h); g.addColorStop(0,'#11101a'); g.addColorStop(.55,'#07080d'); g.addColorStop(1,'#181016'); ctx.fillStyle = g; ctx.fillRect(0,0,world.w,world.h);
@@ -322,6 +365,16 @@
     drawSpriteLike(e.state, e.frame, isPlayer ? 1 : .94, isPlayer);
     ctx.restore();
     if (isPlayer && e.atk > .12) { ctx.save(); ctx.translate(e.x + e.facing*34, e.y-4); ctx.scale(e.facing,1); ctx.strokeStyle='rgba(220,245,255,.75)'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(0,0,38,-.8,.65); ctx.stroke(); ctx.strokeStyle='rgba(217,32,54,.8)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(4,2,32,-.5,.55); ctx.stroke(); ctx.restore(); }
+  }
+  function drawEnemyHealthBar(e) {
+    const pct = clamp(e.hp / e.maxHp, 0, 1);
+    const w = 42, h = 6, x = e.x - w/2, y = e.y - 76;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,.72)'; roundRect(x-2, y-2, w+4, h+4, 3, true);
+    ctx.fillStyle = '#271017'; ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = pct > .55 ? '#d92036' : pct > .25 ? '#ff9f43' : '#8be8ff'; ctx.fillRect(x, y, w * pct, h);
+    ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.strokeRect(x+.5, y+.5, w-1, h-1);
+    ctx.restore();
   }
   function drawSpriteLike(state, frame, s, isPlayer) {
     const sheet = isPlayer ? (state === 'attack' ? spriteAssets.ghostAttack : spriteAssets.ghost) : spriteAssets.guard;
