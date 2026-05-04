@@ -435,7 +435,9 @@
   function drawEntity(e, isPlayer) {
     ctx.save(); ctx.translate(e.x, e.y); if (e.facing < 0) ctx.scale(-1,1);
     if (isPlayer && e.inv > 0 && Math.floor(elapsed*20)%2===0) ctx.globalAlpha=.45;
-    const drawFrame = isPlayer && e.state === 'attack' ? Math.min(5, Math.floor(clamp(1 - e.atk / .56, 0, .999) * 6)) : isPlayer && e.state === 'idle' ? 0 : e.frame;
+    const drawFrame = isPlayer
+      ? (e.state === 'attack' ? Math.min(5, Math.floor(clamp(1 - e.atk / .56, 0, .999) * 6)) : e.state === 'idle' ? 0 : e.frame)
+      : enemyDrawFrameForState(e);
     drawSpriteLike(e.state, drawFrame, isPlayer ? PLAYER_SPRITE_SCALE : ENEMY_SPRITE_SCALE, isPlayer);
     ctx.restore();
   }
@@ -482,11 +484,18 @@
   }
   function enemySheetFramesForState(state) {
     if (state === 'idle') return [0, 1, 2, 1];
-    if (state === 'walk' || state === 'stalk') return [0, 1, 2, 3, 4, 5];
+    if (state === 'walk' || state === 'stalk') return [0, 1, 2, 3, 4, 3];
     if (state === 'run') return [0, 1, 2, 3, 4, 3];
-    if (state === 'attack') return [0, 1, 2, 3, 4, 5];
-    if (state === 'hurt') return [0, 1, 2, 3, 4, 3];
+    if (state === 'attack') return [0, 1, 2, 3, 4];
+    if (state === 'hurt') return [5];
     return [0];
+  }
+
+  function enemyDrawFrameForState(e) {
+    if (e.state === 'attack') return Math.min(4, Math.floor(clamp(1 - e.atk / .4, 0, .999) * 5));
+    if (e.state === 'hurt') return 0;
+    if (e.state === 'idle') return 0;
+    return e.frame;
   }
   function drawEnemyGridFrame(sheet, state, frame, s) {
     const row = enemySheetRowForState(state);
