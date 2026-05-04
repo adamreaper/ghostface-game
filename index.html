@@ -134,8 +134,8 @@
     const sheet = { img, cols, rows, ready: false };
     img.onload = () => {
       sheet.ready = true;
-      sheet.cellW = Math.floor(img.width / cols);
-      sheet.cellH = Math.floor(img.height / rows);
+      sheet.cellW = img.width / cols;
+      sheet.cellH = img.height / rows;
       sheet.frames = cols;
     };
     img.src = src;
@@ -145,7 +145,7 @@
   const world = { w: 1600, h: 1000 };
   const camera = { x: 0, y: 0 };
   const PLAYER_SPRITE_SCALE = .72;
-  const ENEMY_SPRITE_SCALE = .94;
+  const ENEMY_SPRITE_SCALE = .72;
   const player = { x: 210, y: 220, r: 18, vx: 0, vy: 0, speed: 185, hp: 100, facing: 1, state: 'idle', frame: 0, animT: 0, atk: 0, dash: 0, inv: 0, combo: 0 };
   const enemies = [];
   const phones = [];
@@ -306,7 +306,7 @@
       const speed = e.speed + phones.filter(p=>p.got).length * 4;
       if (e.stun <= 0) moveEntity(e, dx/l * speed * dt, dy/l * speed * dt);
       e.facing = dx >= 0 ? 1 : -1;
-      e.state = e.stun > 0 ? 'hurt' : seen ? 'run' : 'walk';
+      e.state = e.stun > 0 ? 'hurt' : e.atk > 0 ? 'attack' : seen ? 'run' : 'walk';
       if (l < e.r + player.r + 8 && player.inv <= 0) {
         player.hp = Math.max(0, player.hp - Math.min(22, 11 + level)); player.inv = .85; e.atk = .4; shake = 10; burst(player.x, player.y, '#d92036', 14);
         if (player.hp <= 0) triggerGameOver(); else UI.status.textContent = 'A hunter hit you!';
@@ -437,14 +437,24 @@
     if (state === 'attack') return 3;
     if (state === 'run') return 2;
     if (state === 'walk' || state === 'stalk') return 1;
-    if (state === 'hurt') return 5;
+    if (state === 'hurt') return 4;
     return 0;
+  }
+  function enemySheetFramesForState(state) {
+    if (state === 'idle') return [0, 1, 2, 1];
+    if (state === 'walk' || state === 'stalk') return [0, 1, 2, 3, 4, 5];
+    if (state === 'run') return [0, 1, 2, 3, 4, 3];
+    if (state === 'attack') return [0, 1, 2, 3, 4, 5];
+    if (state === 'hurt') return [0, 1, 2, 3, 4, 3];
+    return [0];
   }
   function drawEnemyGridFrame(sheet, state, frame, s) {
     const row = enemySheetRowForState(state);
-    const col = Math.floor(frame) % sheet.cols;
+    const seq = enemySheetFramesForState(state);
+    const col = seq[Math.floor(frame) % seq.length];
     const outW = sheet.cellW * s;
     const outH = sheet.cellH * s;
+    const drawY = 16 * s - outH;
     ctx.drawImage(
       sheet.img,
       col * sheet.cellW,
@@ -452,7 +462,7 @@
       sheet.cellW,
       sheet.cellH,
       Math.round(-outW / 2),
-      Math.round(-68 * s),
+      Math.round(drawY),
       Math.round(outW),
       Math.round(outH)
     );
