@@ -35,7 +35,11 @@ Collect all phones while avoiding the hunters. Every cleared level immediately r
 
 ## Files
 
-- `index.html` — single-page game prototype using transparent pixel-art atlas assets
+- `index.html` — single-page game prototype using transparent pixel-art atlas assets; includes Safari Add to Home Screen metadata and icon links
+- `manifest.webmanifest` — standalone mobile web app manifest for home-screen launch behavior
+- `assets/app-icons/apple-touch-icon.png` — 180×180 Safari/iOS home-screen icon using the current uploaded-sheet Ghostface art
+- `assets/app-icons/icon-192.png` / `assets/app-icons/icon-512.png` — PWA manifest icons
+- `assets/app-icons/favicon-32.png` — browser tab/favicon PNG
 - `assets/uploaded-ghostface-v22/ghostface_uploaded_v22_idle_192x144.png` — runtime player idle atlas extracted only from Nate's uploaded 6×6 Ghostface sheet, transparent RGBA, 6 frames repacked on a stable pivot; runtime freezes idle on frame 0 so Ghostface does not drift while standing
 - `assets/uploaded-ghostface-v22/ghostface_uploaded_v22_walk_192x144.png` — runtime player walk atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames with stable center/baseline alignment
 - `assets/uploaded-ghostface-v22/ghostface_uploaded_v22_run_192x144.png` — runtime player run atlas extracted only from Nate's uploaded sheet, transparent RGBA, 6 frames with stable center/baseline alignment
