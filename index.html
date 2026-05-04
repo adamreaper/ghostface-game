@@ -131,15 +131,55 @@
 
   function loadGridSprite(src, cols, rows) {
     const img = new Image();
-    const sheet = { img, cols, rows, ready: false };
+    const sheet = { img, cols, rows, ready: false, anchors: [] };
     img.onload = () => {
       sheet.ready = true;
       sheet.cellW = img.width / cols;
       sheet.cellH = img.height / rows;
       sheet.frames = cols;
+      sheet.anchors = computeGridAnchors(img, cols, rows, sheet.cellW, sheet.cellH);
     };
     img.src = src;
     return sheet;
+  }
+
+  function computeGridAnchors(img, cols, rows, cellW, cellH) {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const c = canvas.getContext('2d', { willReadFrequently: true });
+    c.drawImage(img, 0, 0);
+    const { data, width } = c.getImageData(0, 0, img.width, img.height);
+    const anchors = [];
+    const xEdges = Array.from({ length: cols + 1 }, (_, i) => Math.round(i * img.width / cols));
+    const yEdges = Array.from({ length: rows + 1 }, (_, i) => Math.round(i * img.height / rows));
+
+    for (let row = 0; row < rows; row++) {
+      const rowAnchors = [];
+      for (let col = 0; col < cols; col++) {
+        const left = xEdges[col], right = xEdges[col + 1];
+        const top = yEdges[row], bottom = yEdges[row + 1];
+        let minX = right - left, maxX = 0, minY = bottom - top, maxY = 0, found = false;
+        for (let y = top; y < bottom; y++) {
+          for (let x = left; x < right; x++) {
+            if (data[(y * width + x) * 4 + 3] > 0) {
+              found = true;
+              const rx = x - left;
+              const ry = y - top;
+              if (rx < minX) minX = rx;
+              if (rx > maxX) maxX = rx;
+              if (ry < minY) minY = ry;
+              if (ry > maxY) maxY = ry;
+            }
+          }
+        }
+        rowAnchors.push(found
+          ? { centerX: (minX + maxX + 1) / 2, bottom: maxY + 1 }
+          : { centerX: cellW / 2, bottom: cellH });
+      }
+      anchors.push(rowAnchors);
+    }
+    return anchors;
   }
 
   const world = { w: 1600, h: 1000 };
@@ -454,14 +494,17 @@
     const col = seq[Math.floor(frame) % seq.length];
     const outW = sheet.cellW * s;
     const outH = sheet.cellH * s;
-    const drawY = 16 * s - outH;
+    const anchor = sheet.anchors?.[row]?.[col] || { centerX: sheet.cellW / 2, bottom: sheet.cellH };
+    const baselineY = 16 * s;
+    const drawX = -anchor.centerX * s;
+    const drawY = baselineY - anchor.bottom * s;
     ctx.drawImage(
       sheet.img,
       col * sheet.cellW,
       row * sheet.cellH,
       sheet.cellW,
       sheet.cellH,
-      Math.round(-outW / 2),
+      Math.round(drawX),
       Math.round(drawY),
       Math.round(outW),
       Math.round(outH)
