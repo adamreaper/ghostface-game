@@ -116,7 +116,7 @@
     ghostRun: loadSprite('assets/uploaded-ghostface-v22/ghostface_uploaded_v22_run_192x144.png', 192, 144, 6),
     ghostAttack: loadSprite('assets/uploaded-ghostface-v22/ghostface_uploaded_v22_attack_192x144.png', 192, 144, 6),
     ghostHurt: loadSprite('assets/uploaded-ghostface-v22/ghostface_uploaded_v22_hurt_death_192x144.png', 192, 144, 6),
-    guard: loadSprite('assets/detailed-transparent/guard_detailed_80x80.png', 80, 80, 4),
+    enemyWoman: loadGridSprite('assets/enemies/enemy-woman-sheet-v1.png', 6, 6),
     phone: loadSprite('assets/detailed-transparent/phone_detailed_32x32.png', 32, 32, 3),
     wall: loadSprite('assets/detailed-transparent/wall_tiles_detailed_64x64.png', 64, 64, 4)
   };
@@ -125,6 +125,19 @@
     const img = new Image();
     const sheet = { img, cellW, cellH, frames, ready: false };
     img.onload = () => { sheet.ready = true; };
+    img.src = src;
+    return sheet;
+  }
+
+  function loadGridSprite(src, cols, rows) {
+    const img = new Image();
+    const sheet = { img, cols, rows, ready: false };
+    img.onload = () => {
+      sheet.ready = true;
+      sheet.cellW = Math.floor(img.width / cols);
+      sheet.cellH = Math.floor(img.height / rows);
+      sheet.frames = cols;
+    };
     img.src = src;
     return sheet;
   }
@@ -397,12 +410,16 @@
     ctx.restore();
   }
   function drawSpriteLike(state, frame, s, isPlayer) {
-    const sheet = isPlayer ? playerSheetForState(state) : spriteAssets.guard;
+    const sheet = isPlayer ? playerSheetForState(state) : spriteAssets.enemyWoman;
     if (sheet.ready) {
-      const idx = Math.floor(frame) % sheet.frames;
-      const outW = sheet.cellW * s;
-      const outH = sheet.cellH * s;
-      drawAtlasFrame(sheet, idx, -outW / 2, isPlayer ? 20 * s - outH : -68 * s, outW, outH);
+      if (isPlayer) {
+        const idx = Math.floor(frame) % sheet.frames;
+        const outW = sheet.cellW * s;
+        const outH = sheet.cellH * s;
+        drawAtlasFrame(sheet, idx, -outW / 2, 20 * s - outH, outW, outH);
+      } else {
+        drawEnemyGridFrame(sheet, state, frame, s);
+      }
       return;
     }
     // No procedural Ghostface fallback: player visuals must come only from Nate's uploaded, stable-pivot atlas.
@@ -415,6 +432,30 @@
     if (state === 'walk') return spriteAssets.ghostWalk;
     if (state === 'hurt') return spriteAssets.ghostHurt;
     return spriteAssets.ghostIdle;
+  }
+  function enemySheetRowForState(state) {
+    if (state === 'attack') return 3;
+    if (state === 'run') return 2;
+    if (state === 'walk' || state === 'stalk') return 1;
+    if (state === 'hurt') return 5;
+    return 0;
+  }
+  function drawEnemyGridFrame(sheet, state, frame, s) {
+    const row = enemySheetRowForState(state);
+    const col = Math.floor(frame) % sheet.cols;
+    const outW = sheet.cellW * s;
+    const outH = sheet.cellH * s;
+    ctx.drawImage(
+      sheet.img,
+      col * sheet.cellW,
+      row * sheet.cellH,
+      sheet.cellW,
+      sheet.cellH,
+      Math.round(-outW / 2),
+      Math.round(-68 * s),
+      Math.round(outW),
+      Math.round(outH)
+    );
   }
   function drawAtlasFrame(sheet, frame, dx, dy, dw, dh) {
     ctx.drawImage(sheet.img, frame * sheet.cellW, 0, sheet.cellW, sheet.cellH, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
