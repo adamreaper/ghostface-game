@@ -63,7 +63,7 @@
     </div>
     <div class="hud-card" id="score">
       <div class="brand">LEVEL <span id="level">1</span> · <span id="found">0</span>/<span id="total">5</span> PHONES</div>
-      <div class="sub">Time <span id="timer">00:00</span> · Combo <span id="combo">0</span> · Enemies <span id="enemyCount">1</span> · Defeated <span id="defeatedCount">0</span></div>
+      <div class="sub"><span id="mapName">BACKROOMS</span> · Time <span id="timer">00:00</span> · Combo <span id="combo">0</span> · Enemies <span id="enemyCount">1</span> · Defeated <span id="defeatedCount">0</span></div>
     </div>
   </div>
   <div class="controls">
@@ -99,7 +99,7 @@
   const UI = {
     hp: document.getElementById('hpBar'), found: document.getElementById('found'), total: document.getElementById('total'),
     timer: document.getElementById('timer'), combo: document.getElementById('combo'), status: document.getElementById('status'), hint: document.getElementById('hint'),
-    level: document.getElementById('level'), enemyCount: document.getElementById('enemyCount'), defeatedCount: document.getElementById('defeatedCount')
+    level: document.getElementById('level'), mapName: document.getElementById('mapName'), enemyCount: document.getElementById('enemyCount'), defeatedCount: document.getElementById('defeatedCount')
   };
 
   const keys = new Set();
@@ -208,6 +208,12 @@
   }
 
   const world = { w: 1600, h: 1000 };
+  const MAPS = [
+    { key: 'backrooms', name: 'BACKROOMS', bg: '#b9a45d', floor: ['#b9a45d', '#c6b56d', '#a9914f', '#d4c277'], wall: '#7f6a36', trim: '#e7d889', accent: '#f2e27d', dust: '#fff1a8' },
+    { key: 'field', name: 'GRASSY FIELD', bg: '#1d612b', floor: ['#1f6b31', '#287a39', '#185425', '#359247'], wall: '#5b4324', trim: '#86c85a', accent: '#f7e26b', dust: '#d8ffd0' },
+    { key: 'hell', name: 'HELL', bg: '#1b0710', floor: ['#240814', '#3a0d16', '#56151a', '#11060b'], wall: '#2c0b10', trim: '#ff6b1a', accent: '#ff2d18', dust: '#ffb14a' }
+  ];
+  function currentMap() { return MAPS[(level - 1) % MAPS.length]; }
   const camera = { x: 0, y: 0 };
   const PLAYER_SPRITE_SCALE = .72;
   const ENEMY_SPRITE_SCALE = .72;
@@ -231,8 +237,13 @@
     Object.assign(player, { x: start.x, y: start.y, vx: 0, vy: 0, hp: fullHeal ? 100 : Math.min(100, player.hp + 18), facing: 1, state: 'idle', frame: 0, animT: 0, atk: 0, dash: 0, inv: 1.1 });
     gameOverTimer = 0; levelClearTimer = 0; shake = 0;
 
-    const obs = [[480,420,210,56],[950,510,270,62],[230,610,60,260],[1210,130,70,260],[660,690,88,180],[1330,520,220,55]];
-    for (const [x,y,w,h] of obs) obstacles.push({ x,y,w,h });
+    const map = currentMap();
+    const obstacleSets = {
+      backrooms: [[420,300,240,54],[860,250,70,270],[990,560,300,58],[230,610,60,260],[1220,150,72,240],[620,720,230,52]],
+      field: [[390,390,220,70],[870,520,250,66],[190,675,220,58],[1170,245,82,240],[690,190,210,50],[1320,650,180,68]],
+      hell: [[440,330,260,62],[930,475,310,68],[210,580,75,280],[1190,130,90,300],[665,735,260,64],[1325,420,170,76]]
+    };
+    for (const [x,y,w,h] of obstacleSets[map.key]) obstacles.push({ x,y,w,h, map: map.key });
 
     const phoneCount = Math.min(5 + level - 1, 18);
     const enemyCount = Math.min(1 + Math.floor((level - 1) / 2), 8);
@@ -242,7 +253,7 @@
     }
     for (let i=0;i<enemyCount;i++) enemies.push(makeEnemy(i));
     UI.total.textContent = phones.length;
-    UI.status.textContent = `Level ${level}: collect ${phones.length} phones. Avoid the hunters.`;
+    UI.status.textContent = `${currentMap().name}: collect ${phones.length} phones. Avoid the hunters.`;
     updateUI();
   }
 
@@ -269,7 +280,7 @@
   function advanceLevel() {
     level++;
     player.combo += 5;
-    UI.status.textContent = `Level ${level - 1} cleared. More phones. More hunters.`;
+    UI.status.textContent = `${currentMap().name} cleared. Warping to the next map.`;
     burst(player.x, player.y, '#8be8ff', 34);
     initLevel(false);
   }
@@ -404,7 +415,7 @@
   function burst(x,y,color,n) { for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*160,vy:(Math.random()-.5)*160-20,life:.35+Math.random()*.45,color,size:2+Math.random()*4}); }
   function updateParticles(dt) { for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=180*dt; if(p.life<=0) particles.splice(i,1); } }
   function updateUI() {
-    UI.hp.style.width = player.hp + '%'; UI.found.textContent = phones.filter(p=>p.got).length; UI.combo.textContent = player.combo; UI.level.textContent = level; UI.enemyCount.textContent = enemies.filter(e=>!e.dead).length; UI.defeatedCount.textContent = defeatedEnemies;
+    UI.hp.style.width = player.hp + '%'; UI.found.textContent = phones.filter(p=>p.got).length; UI.combo.textContent = player.combo; UI.level.textContent = level; UI.mapName.textContent = currentMap().name; UI.enemyCount.textContent = enemies.filter(e=>!e.dead).length; UI.defeatedCount.textContent = defeatedEnemies;
     const t = Math.floor(elapsed); UI.timer.textContent = String(Math.floor(t/60)).padStart(2,'0') + ':' + String(t%60).padStart(2,'0');
     if (phones.every(p=>p.got) && levelClearTimer > 0) UI.status.textContent = `Level ${level} clear! Next wave incoming...`;
   }
@@ -435,23 +446,95 @@
     drawWorld(); drawPhones(); for (const e of enemies) if (!e.dead) { drawEntity(e, false); drawEnemyHealthBar(e); } drawEntity(player, true); drawParticles(); ctx.restore(); drawVignette(); if (player.hp <= 0) drawGameOverOverlay();
   }
   function drawWorld() {
-    const g = ctx.createLinearGradient(0,0,world.w,world.h); g.addColorStop(0,'#11101a'); g.addColorStop(.55,'#07080d'); g.addColorStop(1,'#181016'); ctx.fillStyle = g; ctx.fillRect(0,0,world.w,world.h);
-    ctx.strokeStyle = 'rgba(255,255,255,.035)'; ctx.lineWidth = 1;
-    for(let x=0;x<world.w;x+=64){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,world.h); ctx.stroke(); }
-    for(let y=0;y<world.h;y+=64){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(world.w,y); ctx.stroke(); }
-    for (let i=0;i<obstacles.length;i++) drawWallObstacle(obstacles[i], i);
-    for (let i=0;i<70;i++) { const x=(i*283)%world.w, y=(i*151)%world.h; ctx.fillStyle = i%5===0 ? 'rgba(200,20,45,.15)' : 'rgba(255,255,255,.035)'; ctx.fillRect(x,y,2,2); }
+    const map = currentMap();
+    ctx.fillStyle = map.bg; ctx.fillRect(0,0,world.w,world.h);
+    if (map.key === 'backrooms') drawBackroomsMap(map);
+    else if (map.key === 'field') drawFieldMap(map);
+    else drawHellMap(map);
+    for (let i=0;i<obstacles.length;i++) drawWallObstacle(obstacles[i], i, map);
+    drawMapAtmosphere(map);
   }
-  function drawWallObstacle(o, variant) {
-    const sheet = spriteAssets.wall;
-    ctx.fillStyle = '#171620'; ctx.fillRect(o.x,o.y,o.w,o.h);
-    if (!sheet.ready) { ctx.fillStyle = 'rgba(255,255,255,.045)'; ctx.fillRect(o.x,o.y, o.w,5); return; }
-    ctx.save(); ctx.beginPath(); ctx.rect(o.x,o.y,o.w,o.h); ctx.clip();
-    for (let y=o.y; y<o.y+o.h; y+=sheet.cellH) {
-      for (let x=o.x; x<o.x+o.w; x+=sheet.cellW) drawAtlasFrame(sheet, (variant + Math.floor(x/64) + Math.floor(y/64)) % sheet.frames, x, y, sheet.cellW, sheet.cellH);
+  function tileHash(x, y, seed = 0) {
+    let n = (Math.floor(x) * 374761393 + Math.floor(y) * 668265263 + seed * 982451653) >>> 0;
+    n = (n ^ (n >>> 13)) >>> 0; n = Math.imul(n, 1274126177) >>> 0;
+    return ((n ^ (n >>> 16)) >>> 0) / 4294967295;
+  }
+  function pick(arr, x, y, seed = 0) { return arr[Math.floor(tileHash(x, y, seed) * arr.length) % arr.length]; }
+  function drawPixelGrid(map, tile = 32) {
+    for (let y=0; y<world.h; y+=tile) {
+      for (let x=0; x<world.w; x+=tile) {
+        ctx.fillStyle = pick(map.floor, x/tile, y/tile, 1);
+        ctx.fillRect(x, y, tile, tile);
+        const n = tileHash(x/tile, y/tile, 2);
+        ctx.fillStyle = n > .72 ? 'rgba(0,0,0,.10)' : 'rgba(255,255,255,.06)';
+        ctx.fillRect(x + (n>.5 ? tile-5 : 2), y + 2, 3, 3);
+      }
     }
-    ctx.restore();
-    ctx.strokeStyle = 'rgba(255,255,255,.10)'; ctx.strokeRect(o.x+.5,o.y+.5,o.w-1,o.h-1);
+  }
+  function drawBackroomsMap(map) {
+    drawPixelGrid(map, 32);
+    ctx.fillStyle = 'rgba(102,86,42,.45)';
+    for (let x=0; x<world.w; x+=160) ctx.fillRect(x, 0, 6, world.h);
+    for (let y=0; y<world.h; y+=128) ctx.fillRect(0, y, world.w, 5);
+    for (let i=0;i<12;i++) {
+      const x = 90 + (i*337)%1380, y = 70 + (i*191)%790;
+      ctx.fillStyle = 'rgba(255,246,165,.32)'; ctx.fillRect(x, y, 86, 8); ctx.fillRect(x+6, y+8, 74, 3);
+      ctx.fillStyle = 'rgba(80,67,31,.58)'; ctx.fillRect(x-9, y+54, 42, 78); ctx.fillStyle = 'rgba(35,30,18,.62)'; ctx.fillRect(x+25, y+92, 4, 5);
+    }
+  }
+  function drawFieldMap(map) {
+    drawPixelGrid(map, 32);
+    ctx.fillStyle = 'rgba(119,82,39,.52)';
+    for (let x=-80; x<world.w; x+=96) ctx.fillRect(x + Math.sin(x*.01)*34, 520 + Math.sin(x*.018)*90, 98, 28);
+    for (let i=0;i<210;i++) {
+      const x=(i*179)%world.w, y=(i*263)%world.h, n=tileHash(i, level, 3);
+      ctx.fillStyle = n>.82 ? '#f4df5b' : n>.68 ? '#e889d4' : n>.5 ? '#b9f26a' : '#123f1e';
+      ctx.fillRect(x,y, n>.68 ? 5 : 3, n>.68 ? 5 : 9);
+      if (n>.9) { ctx.fillStyle='#f8fff0'; ctx.fillRect(x+1,y+1,2,2); }
+    }
+    for (let i=0;i<14;i++) {
+      const x=(i*421+88)%world.w, y=(i*173+120)%world.h;
+      ctx.fillStyle='#2d5a32'; ctx.fillRect(x, y, 32, 26); ctx.fillRect(x-12, y+12, 58, 20);
+      ctx.fillStyle='#18321f'; ctx.fillRect(x+8, y+25, 8, 22);
+    }
+  }
+  function drawHellMap(map) {
+    drawPixelGrid(map, 32);
+    for (let i=0;i<18;i++) {
+      const x=(i*313+60)%world.w, y=(i*197+40)%world.h, w=70+(i%4)*22, h=22+(i%3)*16;
+      ctx.fillStyle='rgba(255,65,18,.78)'; ctx.fillRect(x,y,w,h);
+      ctx.fillStyle='rgba(255,176,48,.72)'; ctx.fillRect(x+8,y+6,w-16,5);
+      ctx.fillStyle='rgba(80,12,10,.78)'; ctx.fillRect(x-4,y-4,12,h+8); ctx.fillRect(x+w-8,y-2,10,h+4);
+    }
+    ctx.strokeStyle='rgba(255,86,24,.62)'; ctx.lineWidth=4;
+    for (let i=0;i<24;i++) { const x=(i*139)%world.w, y=(i*281)%world.h; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+28,y+18); ctx.lineTo(x+18,y+48); ctx.stroke(); }
+    for (let i=0;i<50;i++) { const x=(i*229)%world.w, y=(i*157)%world.h; ctx.fillStyle=i%3?'#ff4b1f':'#ffb14a'; ctx.fillRect(x,y,3,3); }
+  }
+  function drawWallObstacle(o, variant, map = currentMap()) {
+    if (map.key === 'field') {
+      ctx.fillStyle = '#4a321d'; ctx.fillRect(o.x,o.y,o.w,o.h);
+      ctx.fillStyle = '#6e4b29'; for (let x=o.x; x<o.x+o.w; x+=18) ctx.fillRect(x,o.y+4,10,o.h-8);
+      ctx.fillStyle = '#234b27'; ctx.fillRect(o.x,o.y-6,o.w,12); ctx.fillRect(o.x,o.y+o.h-6,o.w,12);
+    } else if (map.key === 'hell') {
+      ctx.fillStyle = '#17060a'; ctx.fillRect(o.x,o.y,o.w,o.h);
+      for (let x=o.x; x<o.x+o.w; x+=32) { ctx.fillStyle = pick(['#2b0c11','#3b1013','#110408'], x, o.y, variant); ctx.fillRect(x,o.y,32,o.h); }
+      ctx.fillStyle = 'rgba(255,71,22,.82)'; ctx.fillRect(o.x+4,o.y+4,o.w-8,4); ctx.fillRect(o.x+8,o.y+o.h-8,o.w-16,4);
+    } else {
+      ctx.fillStyle = '#8a7136'; ctx.fillRect(o.x,o.y,o.w,o.h);
+      for (let y=o.y; y<o.y+o.h; y+=24) { ctx.fillStyle = y%48===0 ? '#a88b47' : '#70572b'; ctx.fillRect(o.x,y,o.w,12); }
+      ctx.fillStyle = '#f1df81'; ctx.fillRect(o.x+5,o.y+5,o.w-10,5);
+    }
+    ctx.strokeStyle = map.trim; ctx.lineWidth = 2; ctx.strokeRect(o.x+.5,o.y+.5,o.w-1,o.h-1);
+    ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.strokeRect(o.x+4.5,o.y+4.5,o.w-9,o.h-9);
+  }
+  function drawMapAtmosphere(map) {
+    for (let i=0;i<80;i++) {
+      const x=(i*283 + level*37)%world.w, y=(i*151 + level*59)%world.h;
+      ctx.fillStyle = i%7===0 ? map.accent : 'rgba(255,255,255,.05)';
+      ctx.globalAlpha = map.key === 'hell' ? .28 : map.key === 'field' ? .18 : .22;
+      ctx.fillRect(x,y,map.key === 'hell' ? 3 : 2,map.key === 'field' ? 4 : 2);
+      ctx.globalAlpha = 1;
+    }
   }
   function drawPhones() {
     const sheet = spriteAssets.phone;
