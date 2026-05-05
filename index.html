@@ -99,12 +99,24 @@
       clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
     }
     .start-btn:active { transform: translate(3px, 3px); filter: brightness(1.25); }
+    .pause-btn {
+      position: fixed; top: calc(10px + env(safe-area-inset-top)); right: 12px; z-index: 4; width: 48px; height: 42px;
+      border: 3px solid #2a1a21; background: rgba(8,9,14,.82); color: #fff3b7; pointer-events: auto;
+      font: 900 18px/1 "Courier New", ui-monospace, monospace; letter-spacing: .04em; text-shadow: 2px 2px 0 #000;
+      box-shadow: inset 0 0 0 3px rgba(255,243,183,.16), 4px 4px 0 rgba(0,0,0,.62);
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+    }
+    .pause-btn:active { transform: translate(2px, 2px); filter: brightness(1.25); }
+    body.menu-open .pause-btn, body.paused .controls { opacity: 0; pointer-events: none; }
+    .pause-actions { display: grid; gap: 10px; margin-top: 16px; }
+    .pause-actions .start-btn { margin-top: 0; }
     @media (max-width: 520px) { .menu-title { font-size: 27px; } .skin-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .skin-option { min-height: 104px; } }
   </style>
 </head>
 <body class="menu-open">
   <canvas id="game"></canvas>
   <div class="hud"><div class="phone-counter" id="status"><span id="phoneCount">0/5</span><span class="phone-icon" aria-label="phone"></span></div></div>
+  <button class="pause-btn" id="pauseBtn" type="button" aria-label="Pause">Ⅱ</button>
   <div class="controls">
     <div class="stick-zone" id="stickZone"><div class="stick" id="stick"></div></div>
     <div class="buttons">
@@ -119,6 +131,16 @@
       <div class="skin-title">SELECT SKIN</div>
       <div class="skin-grid" id="skinGrid"></div>
       <button class="start-btn" id="startBtn" type="button">START RUN</button>
+    </div>
+  </div>
+  <div class="menu hidden" id="pauseMenu">
+    <div class="menu-panel">
+      <h1 class="menu-title">PAUSED</h1>
+      <p class="menu-sub">Take a breather. Resume the chase or restart back at the main menu.</p>
+      <div class="pause-actions">
+        <button class="start-btn" id="resumeBtn" type="button">RESUME</button>
+        <button class="start-btn" id="restartMenuBtn" type="button">RESTART TO MENU</button>
+      </div>
     </div>
   </div>
 <script>
@@ -138,6 +160,7 @@
   let levelClearTimer = 0;
   let defeatedEnemies = 0;
   let gameStarted = false;
+  let gamePaused = false;
   let selectedSkin = 0;
 
   const SKINS = [
@@ -153,8 +176,12 @@
     status: document.getElementById('status'),
     phoneCount: document.getElementById('phoneCount'),
     startMenu: document.getElementById('startMenu'),
+    pauseMenu: document.getElementById('pauseMenu'),
     skinGrid: document.getElementById('skinGrid'),
-    startBtn: document.getElementById('startBtn')
+    startBtn: document.getElementById('startBtn'),
+    pauseBtn: document.getElementById('pauseBtn'),
+    resumeBtn: document.getElementById('resumeBtn'),
+    restartMenuBtn: document.getElementById('restartMenuBtn')
   };
 
   const keys = new Set();
@@ -345,13 +372,37 @@
   }
   function startRun() {
     gameStarted = true;
-    document.body.classList.remove('menu-open');
+    gamePaused = false;
+    document.body.classList.remove('menu-open', 'paused');
     UI.startMenu.classList.add('hidden');
+    UI.pauseMenu.classList.add('hidden');
     restartRun();
+  }
+  function setPaused(paused) {
+    if (!gameStarted || player.hp <= 0) return;
+    gamePaused = paused;
+    document.body.classList.toggle('paused', gamePaused);
+    UI.pauseMenu.classList.toggle('hidden', !gamePaused);
+  }
+  function restartToMainMenu() {
+    gameStarted = false;
+    gamePaused = false;
+    document.body.classList.add('menu-open');
+    document.body.classList.remove('paused');
+    UI.pauseMenu.classList.add('hidden');
+    UI.startMenu.classList.remove('hidden');
+    input.x = input.y = 0;
+    input.attack = input.dash = input.attackQueued = input.dashQueued = false;
+    stick.style.transform = 'translate(0px,0px)';
+    restartRun();
+    renderSkinPreviews();
   }
   buildSkinMenu();
   renderSkinPreviews();
   UI.startBtn.addEventListener('pointerdown', e => { e.preventDefault(); startRun(); });
+  UI.pauseBtn.addEventListener('pointerdown', e => { e.preventDefault(); setPaused(true); });
+  UI.resumeBtn.addEventListener('pointerdown', e => { e.preventDefault(); setPaused(false); });
+  UI.restartMenuBtn.addEventListener('pointerdown', e => { e.preventDefault(); restartToMainMenu(); });
 
   function restartRun() {
     level = 1;
@@ -468,15 +519,15 @@
   addEventListener('resize', resize, { passive: true }); resize(); restartRun();
 
   function bindButton(el, prop, queued) {
-    const down = e => { e.preventDefault(); input[prop] = true; input[queued] = true; el.classList.add('active'); };
+    const down = e => { e.preventDefault(); if (gamePaused) return; input[prop] = true; input[queued] = true; el.classList.add('active'); };
     const up = e => { e.preventDefault(); input[prop] = false; el.classList.remove('active'); };
     el.addEventListener('pointerdown', down);
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('pointerleave', up);
   }
   bindButton(attackBtn, 'attack', 'attackQueued'); bindButton(dashBtn, 'dash', 'dashQueued');
 
-  stickZone.addEventListener('pointerdown', e => { stickPointer = e.pointerId; stickZone.setPointerCapture(stickPointer); updateStick(e); });
-  stickZone.addEventListener('pointermove', e => { if (e.pointerId === stickPointer) updateStick(e); });
+  stickZone.addEventListener('pointerdown', e => { if (gamePaused) return; stickPointer = e.pointerId; stickZone.setPointerCapture(stickPointer); updateStick(e); });
+  stickZone.addEventListener('pointermove', e => { if (!gamePaused && e.pointerId === stickPointer) updateStick(e); });
   function releaseStick(e) { if (e.pointerId !== stickPointer) return; stickPointer = null; input.x = input.y = 0; stick.style.transform = 'translate(0px,0px)'; }
   stickZone.addEventListener('pointerup', releaseStick); stickZone.addEventListener('pointercancel', releaseStick);
   function updateStick(e) {
@@ -487,7 +538,14 @@
     input.x = dx / max; input.y = dy / max;
   }
 
-  addEventListener('keydown', e => { if (!gameStarted && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); startRun(); return; } keys.add(e.code); if (e.code === 'Space') input.attackQueued = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.dashQueued = true; });
+  addEventListener('keydown', e => {
+    if (!gameStarted && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); startRun(); return; }
+    if (gameStarted && e.code === 'Escape') { e.preventDefault(); setPaused(!gamePaused); return; }
+    if (gamePaused) return;
+    keys.add(e.code);
+    if (e.code === 'Space') input.attackQueued = true;
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.dashQueued = true;
+  });
   addEventListener('keyup', e => keys.delete(e.code));
   function keyboardVector() {
     let x = 0, y = 0;
@@ -588,9 +646,9 @@
 
   function draw() {
     const now = performance.now(); const dt = Math.min(.033, (now-last)/1000); last = now;
-    if (gameStarted) {
+    if (gameStarted && !gamePaused) {
       if (player.hp > 0) update(dt); else updateGameOver(dt);
-    } else {
+    } else if (!gameStarted) {
       elapsed += dt;
       animate(player, dt);
     }
