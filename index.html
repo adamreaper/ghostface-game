@@ -34,7 +34,12 @@
       text-shadow: 2px 0 #13080d, -2px 0 #13080d, 0 2px #13080d, 0 -2px #13080d, 3px 3px 0 #000;
       image-rendering: pixelated;
     }
-    .phone-counter { padding: 0; }
+    .phone-counter { padding: 0; display: inline-flex; align-items: center; gap: 7px; }
+    .phone-icon {
+      width: 32px; height: 32px; flex: 0 0 32px; display: inline-block;
+      background: url('assets/detailed-transparent/phone_detailed_32x32.png') 0 0 / 96px 32px no-repeat;
+      image-rendering: pixelated; transform: translateY(-1px);
+    }
     .controls { position: fixed; inset: auto 0 calc(14px + env(safe-area-inset-bottom)) 0; pointer-events: none; }
     .stick-zone { pointer-events: auto; position: absolute; left: 16px; bottom: 0; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.08), rgba(255,255,255,.025)); border: 1px solid var(--line); box-shadow: inset 0 0 0 2px rgba(255,255,255,.03); touch-action: none; }
     .stick { position: absolute; left: 50%; top: 50%; width: 62px; height: 62px; margin: -31px 0 0 -31px; border-radius: 50%; background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.38), rgba(180,190,205,.16) 42%, rgba(20,22,29,.75)); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 10px 28px rgba(0,0,0,.45); }
@@ -48,7 +53,7 @@
 </head>
 <body>
   <canvas id="game"></canvas>
-  <div class="hud"><div class="phone-counter" id="status">0/5 📱</div></div>
+  <div class="hud"><div class="phone-counter" id="status"><span id="phoneCount">0/5</span><span class="phone-icon" aria-label="phone"></span></div></div>
   <div class="controls">
     <div class="stick-zone" id="stickZone"><div class="stick" id="stick"></div></div>
     <div class="buttons">
@@ -73,7 +78,7 @@
   let levelClearTimer = 0;
   let defeatedEnemies = 0;
 
-  const UI = { status: document.getElementById('status') };
+  const UI = { status: document.getElementById('status'), phoneCount: document.getElementById('phoneCount') };
 
   const keys = new Set();
   const input = { x: 0, y: 0, attack: false, dash: false, attackQueued: false, dashQueued: false };
@@ -416,7 +421,7 @@
   function updateParticles(dt) { for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=180*dt; if(p.life<=0) particles.splice(i,1); } }
   function updateUI() {
     const collected = phones.filter(p => p.got).length;
-    UI.status.textContent = `${collected}/${phones.length} 📱`;
+    UI.phoneCount.textContent = `${collected}/${phones.length}`;
   }
 
   function updateGameOver(dt) {
