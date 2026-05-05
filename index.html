@@ -501,10 +501,13 @@
     return 0;
   }
   function enemySheetFramesForState(state) {
+    // The source sheet has several loose/cross-cell frames that still look like
+    // teleporting even when anchored correctly. Keep gameplay states on the
+    // cleanest cells until the enemy art is re-authored into a normalized atlas.
     if (state === 'idle') return [0, 1, 2, 1];
-    if (state === 'walk' || state === 'stalk') return [0, 1, 2, 3, 4, 3];
-    if (state === 'run') return [0, 1, 2, 3, 4, 3];
-    if (state === 'attack') return [0, 1, 2, 3, 4];
+    if (state === 'walk' || state === 'stalk') return [0, 1, 2, 1];
+    if (state === 'run') return [0, 1, 0, 1];
+    if (state === 'attack') return [0, 1, 2, 3];
     if (state === 'hurt') return [5];
     return [0];
   }
