@@ -63,9 +63,46 @@
     #attackBtn { right: 8px; bottom: 28px; width: 96px; height: 96px; border-color: #721827; background: #2a0c15; color: #ffd7dc; font-size: 14px; }
     #dashBtn { left: 8px; bottom: 8px; width: 68px; height: 68px; border-color: #17485a; background: #0d2631; color: #c8f6ff; font-size: 11px; }
     @media (min-width: 900px) { .stick-zone { width: 132px; height: 132px; } .buttons { transform: scale(.92); transform-origin: bottom right; } }
+    body.menu-open .hud, body.menu-open .controls { opacity: 0; pointer-events: none; }
+    .menu {
+      position: fixed; inset: 0; z-index: 5; display: grid; place-items: center; padding: 22px;
+      background: radial-gradient(circle at 50% 24%, rgba(217,32,54,.18), rgba(7,6,11,.9) 38%, rgba(0,0,0,.96));
+      image-rendering: pixelated;
+    }
+    .menu.hidden { display: none; }
+    .menu-panel {
+      width: min(560px, calc(100vw - 28px)); max-height: calc(100vh - 36px); overflow: auto;
+      padding: 18px; background: rgba(8,9,14,.92); border: 4px solid #2a1a21;
+      box-shadow: inset 0 0 0 3px rgba(255,243,183,.18), 8px 8px 0 rgba(0,0,0,.68);
+      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+    }
+    .menu-title { margin: 0 0 8px; color: #fff3b7; font: 900 34px/1 "Courier New", ui-monospace, monospace; letter-spacing: .08em; text-shadow: 3px 0 #13080d, -3px 0 #13080d, 0 3px #13080d, 0 -3px #13080d, 5px 5px 0 #000; }
+    .menu-sub { margin: 0 0 16px; color: #c8f6ff; font: 900 13px/1.35 "Courier New", ui-monospace, monospace; letter-spacing: .05em; text-shadow: 2px 2px 0 #000; }
+    .skin-title { margin: 12px 0 10px; color: #ffd7dc; font: 900 14px/1 "Courier New", ui-monospace, monospace; letter-spacing: .08em; text-shadow: 2px 2px 0 #000; }
+    .skin-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+    .skin-option {
+      border: 3px solid #2a1a21; background: #14151d; min-height: 116px; padding: 6px; color: #fff3b7;
+      font: 900 10px/1.1 "Courier New", ui-monospace, monospace; letter-spacing: .05em; text-transform: uppercase;
+      box-shadow: inset 0 0 0 2px rgba(255,243,183,.12), 4px 4px 0 rgba(0,0,0,.55);
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+    }
+    .skin-option.active { border-color: #fff3b7; color: #fff; background: #251620; }
+    .skin-preview {
+      width: 58px; height: 72px; margin: 0 auto 6px; background-image: url('assets/uploaded-ghostface-v22/ghostface_uploaded_v22_idle_192x144.png');
+      background-size: 576px 72px; background-position: 0 0; background-repeat: no-repeat; image-rendering: pixelated;
+    }
+    .skin-name { display: block; text-align: center; }
+    .start-btn {
+      width: 100%; margin-top: 16px; min-height: 54px; border: 3px solid #721827; background: #2a0c15; color: #ffd7dc;
+      font: 900 18px/1 "Courier New", ui-monospace, monospace; letter-spacing: .08em; text-shadow: 2px 2px 0 #000;
+      box-shadow: inset 0 0 0 3px rgba(255,243,183,.14), inset -6px -6px 0 rgba(0,0,0,.35), 5px 5px 0 rgba(0,0,0,.65);
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+    }
+    .start-btn:active { transform: translate(3px, 3px); filter: brightness(1.25); }
+    @media (max-width: 520px) { .menu-title { font-size: 27px; } .skin-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .skin-option { min-height: 104px; } }
   </style>
 </head>
-<body>
+<body class="menu-open">
   <canvas id="game"></canvas>
   <div class="hud"><div class="phone-counter" id="status"><span id="phoneCount">0/5</span><span class="phone-icon" aria-label="phone"></span></div></div>
   <div class="controls">
@@ -73,6 +110,15 @@
     <div class="buttons">
       <div class="btn" id="dashBtn">DASH</div>
       <div class="btn" id="attackBtn">SLASH</div>
+    </div>
+  </div>
+  <div class="menu" id="startMenu">
+    <div class="menu-panel">
+      <h1 class="menu-title">GHOSTFACE</h1>
+      <p class="menu-sub">Collect the phones. Survive the hunters. Pick a skin before the chase starts.</p>
+      <div class="skin-title">SELECT SKIN</div>
+      <div class="skin-grid" id="skinGrid"></div>
+      <button class="start-btn" id="startBtn" type="button">START RUN</button>
     </div>
   </div>
 <script>
@@ -91,8 +137,24 @@
   let level = 1;
   let levelClearTimer = 0;
   let defeatedEnemies = 0;
+  let gameStarted = false;
+  let selectedSkin = 0;
 
-  const UI = { status: document.getElementById('status'), phoneCount: document.getElementById('phoneCount') };
+  const SKINS = [
+    { name: 'Classic', filter: 'none' },
+    { name: 'Crimson', filter: 'sepia(.22) saturate(1.6) hue-rotate(315deg) brightness(1.02)' },
+    { name: 'Phantom', filter: 'sepia(.18) saturate(1.7) hue-rotate(165deg) brightness(1.08)' },
+    { name: 'Toxic', filter: 'sepia(.35) saturate(1.9) hue-rotate(78deg) brightness(1.05)' },
+    { name: 'Shadow', filter: 'grayscale(.85) contrast(1.22) brightness(.72)' }
+  ];
+
+  const UI = {
+    status: document.getElementById('status'),
+    phoneCount: document.getElementById('phoneCount'),
+    startMenu: document.getElementById('startMenu'),
+    skinGrid: document.getElementById('skinGrid'),
+    startBtn: document.getElementById('startBtn')
+  };
 
   const keys = new Set();
   const input = { x: 0, y: 0, attack: false, dash: false, attackQueued: false, dashQueued: false };
@@ -214,6 +276,33 @@
   const phones = [];
   const obstacles = [];
   const particles = [];
+
+  function buildSkinMenu() {
+    UI.skinGrid.innerHTML = SKINS.map((skin, i) => `
+      <button class="skin-option${i === selectedSkin ? ' active' : ''}" data-skin="${i}" type="button">
+        <span class="skin-preview" style="filter:${skin.filter}"></span>
+        <span class="skin-name">${skin.name}</span>
+      </button>
+    `).join('');
+    for (const option of UI.skinGrid.querySelectorAll('.skin-option')) {
+      option.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        selectedSkin = Number(option.dataset.skin) || 0;
+        updateSkinMenu();
+      });
+    }
+  }
+  function updateSkinMenu() {
+    for (const option of UI.skinGrid.querySelectorAll('.skin-option')) option.classList.toggle('active', Number(option.dataset.skin) === selectedSkin);
+  }
+  function startRun() {
+    gameStarted = true;
+    document.body.classList.remove('menu-open');
+    UI.startMenu.classList.add('hidden');
+    restartRun();
+  }
+  buildSkinMenu();
+  UI.startBtn.addEventListener('pointerdown', e => { e.preventDefault(); startRun(); });
 
   function restartRun() {
     level = 1;
@@ -349,7 +438,7 @@
     input.x = dx / max; input.y = dy / max;
   }
 
-  addEventListener('keydown', e => { keys.add(e.code); if (e.code === 'Space') input.attackQueued = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.dashQueued = true; });
+  addEventListener('keydown', e => { if (!gameStarted && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); startRun(); return; } keys.add(e.code); if (e.code === 'Space') input.attackQueued = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.dashQueued = true; });
   addEventListener('keyup', e => keys.delete(e.code));
   function keyboardVector() {
     let x = 0, y = 0;
@@ -450,7 +539,12 @@
 
   function draw() {
     const now = performance.now(); const dt = Math.min(.033, (now-last)/1000); last = now;
-    if (player.hp > 0) update(dt); else updateGameOver(dt);
+    if (gameStarted) {
+      if (player.hp > 0) update(dt); else updateGameOver(dt);
+    } else {
+      elapsed += dt;
+      animate(player, dt);
+    }
     render(); requestAnimationFrame(draw);
   }
 
@@ -459,7 +553,7 @@
     camera.x = clamp(player.x - W/(2*scale), 0, world.w - W/scale); camera.y = clamp(player.y - H/(2*scale), 0, world.h - H/scale);
     ctx.save(); ctx.clearRect(0,0,W,H); ctx.fillStyle = '#07060b'; ctx.fillRect(0,0,W,H);
     ctx.translate(sx, sy); ctx.scale(scale, scale); ctx.translate(-camera.x, -camera.y);
-    drawWorld(); drawPhones(); for (const e of enemies) if (!e.dead) { drawEntity(e, false); drawEnemyHealthBar(e); } drawEntity(player, true); drawPlayerHealthBar(); drawParticles(); ctx.restore(); drawVignette(); if (player.hp <= 0) drawGameOverOverlay();
+    drawWorld(); drawPhones(); for (const e of enemies) if (!e.dead) { drawEntity(e, false); drawEnemyHealthBar(e); } drawEntity(player, true); drawPlayerHealthBar(); drawParticles(); ctx.restore(); drawVignette(); if (gameStarted && player.hp <= 0) drawGameOverOverlay();
   }
   function drawWorld() {
     const map = currentMap();
@@ -592,7 +686,11 @@
         const idx = Math.floor(frame) % sheet.frames;
         const outW = sheet.cellW * s;
         const outH = sheet.cellH * s;
+        const skin = SKINS[selectedSkin] || SKINS[0];
+        ctx.save();
+        ctx.filter = skin.filter;
         drawAtlasFrame(sheet, idx, -outW / 2, 20 * s - outH, outW, outH);
+        ctx.restore();
       } else {
         drawEnemyGridFrame(sheet, state, frame, s);
       }
