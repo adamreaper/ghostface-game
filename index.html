@@ -208,11 +208,16 @@
     chase: makeAudio('assets/audio/chase_loop.ogg', .42, true),
     gameover: makeAudio('assets/audio/gameover_sting.ogg', .55, false)
   };
+  const SFX = {
+    slash: makeAudio('assets/audio/slash_sfx.ogg', .58, false),
+    dash: makeAudio('assets/audio/dash_sfx.ogg', .48, false),
+    kill: makeAudio('assets/audio/kill_sfx.ogg', .62, false)
+  };
 
   function unlockAudio() {
     if (audioUnlocked) return;
     audioUnlocked = true;
-    Object.values(MUSIC).forEach(audio => audio.load());
+    [...Object.values(MUSIC), ...Object.values(SFX)].forEach(audio => audio.load());
     updateMusic();
   }
   function playMusic(name) {
@@ -232,6 +237,14 @@
     if (!sting) return;
     sting.currentTime = 0;
     sting.play().catch(() => {});
+  }
+  function playSfx(name) {
+    if (!audioUnlocked || audioMuted) return;
+    const src = SFX[name];
+    if (!src) return;
+    const sfx = src.cloneNode();
+    sfx.volume = src.volume;
+    sfx.play().catch(() => {});
   }
   function nearestEnemyDistance() {
     let nearest = Infinity;
@@ -662,8 +675,8 @@
     input.attack = input.attack || keys.has('Space'); input.dash = input.dash || keys.has('ShiftLeft') || keys.has('ShiftRight');
 
     player.inv = Math.max(0, player.inv - dt); player.atk = Math.max(0, player.atk - dt); player.dash = Math.max(0, player.dash - dt);
-    if (input.attackQueued && player.atk <= 0) { player.atk = .56; player.animT = 0; player.frame = 0; player.state = 'attack'; }
-    if (input.dashQueued && player.dash <= 0) { player.dash = .72; player.inv = Math.max(player.inv, .28); burst(player.x, player.y, '#8be8ff', 12); }
+    if (input.attackQueued && player.atk <= 0) { player.atk = .56; player.animT = 0; player.frame = 0; player.state = 'attack'; playSfx('slash'); }
+    if (input.dashQueued && player.dash <= 0) { player.dash = .72; player.inv = Math.max(player.inv, .28); playSfx('dash'); burst(player.x, player.y, '#8be8ff', 12); }
     input.attackQueued = false; input.dashQueued = false;
 
     const moving = Math.hypot(ix,iy) > .1;
@@ -702,7 +715,7 @@
       }
       if (player.atk > .12 && Math.abs(player.x + player.facing*36 - e.x) < 58 && Math.abs(player.y - e.y) < 50) {
         e.hp = Math.max(0, e.hp - 26); e.stun = .65; e.hitFlash = .18; shake = Math.max(shake, 7); burst(e.x, e.y, '#d92036', 9); player.combo++;
-        if (e.hp <= 0) { e.dead = true; e.respawnTimer = Math.max(2.2, 4.2 - level * .12); defeatedEnemies++; burst(e.x, e.y, '#dfefff', 18); }
+        if (e.hp <= 0) { e.dead = true; e.respawnTimer = Math.max(2.2, 4.2 - level * .12); defeatedEnemies++; playSfx('kill'); burst(e.x, e.y, '#dfefff', 18); }
       }
     }
   }
