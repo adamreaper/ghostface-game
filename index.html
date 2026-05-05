@@ -88,8 +88,8 @@
     }
     .skin-option.active { border-color: #fff3b7; color: #fff; background: #251620; }
     .skin-preview {
-      width: 58px; height: 72px; margin: 0 auto 6px; background-image: url('assets/uploaded-ghostface-v22/ghostface_uploaded_v22_idle_192x144.png');
-      background-size: 576px 72px; background-position: 0 0; background-repeat: no-repeat; image-rendering: pixelated;
+      display: block; width: 72px; height: 82px; margin: 0 auto 6px;
+      image-rendering: pixelated;
     }
     .skin-name { display: block; text-align: center; }
     .start-btn {
@@ -141,12 +141,13 @@
   let selectedSkin = 0;
 
   const SKINS = [
-    { name: 'Classic', filter: 'none' },
-    { name: 'Crimson', filter: 'sepia(.22) saturate(1.6) hue-rotate(315deg) brightness(1.02)' },
-    { name: 'Phantom', filter: 'sepia(.18) saturate(1.7) hue-rotate(165deg) brightness(1.08)' },
-    { name: 'Toxic', filter: 'sepia(.35) saturate(1.9) hue-rotate(78deg) brightness(1.05)' },
-    { name: 'Shadow', filter: 'grayscale(.85) contrast(1.22) brightness(.72)' }
+    { name: 'Classic' },
+    { name: 'Crimson', robe: [122, 14, 31], shade: [30, 4, 11], accent: [255, 86, 102] },
+    { name: 'Phantom', robe: [24, 92, 124], shade: [4, 22, 34], accent: [139, 232, 255] },
+    { name: 'Toxic', robe: [54, 125, 37], shade: [10, 32, 9], accent: [176, 255, 89] },
+    { name: 'Shadow', robe: [38, 39, 51], shade: [5, 6, 10], accent: [170, 174, 190] }
   ];
+  const skinSheetCache = new Map();
 
   const UI = {
     status: document.getElementById('status'),
@@ -178,7 +179,8 @@
   function loadSprite(src, cellW, cellH, frames) {
     const img = new Image();
     const sheet = { img, cellW, cellH, frames, ready: false };
-    img.onload = () => { sheet.ready = true; };
+    img.onload = () => { sheet.ready = true; renderSkinPreviews(); };
+    sheet.src = src;
     img.src = src;
     return sheet;
   }
@@ -280,7 +282,7 @@
   function buildSkinMenu() {
     UI.skinGrid.innerHTML = SKINS.map((skin, i) => `
       <button class="skin-option${i === selectedSkin ? ' active' : ''}" data-skin="${i}" type="button">
-        <span class="skin-preview" style="filter:${skin.filter}"></span>
+        <canvas class="skin-preview" width="72" height="82" data-skin-preview="${i}"></canvas>
         <span class="skin-name">${skin.name}</span>
       </button>
     `).join('');
@@ -295,6 +297,52 @@
   function updateSkinMenu() {
     for (const option of UI.skinGrid.querySelectorAll('.skin-option')) option.classList.toggle('active', Number(option.dataset.skin) === selectedSkin);
   }
+  function renderSkinPreviews() {
+    const idle = spriteAssets.ghostIdle;
+    if (!idle?.ready || !UI.skinGrid) return;
+    for (const canvas of UI.skinGrid.querySelectorAll('[data-skin-preview]')) {
+      const skinIndex = Number(canvas.dataset.skinPreview) || 0;
+      const previewCtx = canvas.getContext('2d');
+      previewCtx.imageSmoothingEnabled = false;
+      previewCtx.clearRect(0, 0, canvas.width, canvas.height);
+      const sheet = sheetForSkin(idle, skinIndex);
+      if (!sheet.ready) continue;
+      previewCtx.drawImage(sheet.img, 0, 0, idle.cellW, idle.cellH, -18, -4, 108, 81);
+    }
+  }
+  function sheetForSkin(base, skinIndex = selectedSkin) {
+    if (!base?.ready || skinIndex === 0) return base;
+    const key = `${base.src}|${skinIndex}`;
+    if (!skinSheetCache.has(key)) skinSheetCache.set(key, recolorSheet(base, SKINS[skinIndex]));
+    return skinSheetCache.get(key);
+  }
+  function recolorSheet(base, skin) {
+    const canvas = document.createElement('canvas');
+    canvas.width = base.img.width; canvas.height = base.img.height;
+    const c = canvas.getContext('2d', { willReadFrequently: true });
+    c.imageSmoothingEnabled = false;
+    c.drawImage(base.img, 0, 0);
+    const imgData = c.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const a = d[i + 3];
+      if (a < 12) continue;
+      const r = d[i], g = d[i + 1], b = d[i + 2];
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const lum = r * .299 + g * .587 + b * .114;
+      const sat = max - min;
+      // Keep the white Ghostface mask and blade readable; recolor the robe/trim only.
+      if (lum > 142 && sat < 58) continue;
+      const target = lum < 70 ? skin.shade : (lum > 132 && skin.accent ? skin.accent : skin.robe);
+      const strength = lum > 132 ? .62 : .78;
+      const light = Math.max(.42, Math.min(1.45, lum / 92));
+      d[i] = Math.max(0, Math.min(255, target[0] * light * strength + r * (1 - strength)));
+      d[i + 1] = Math.max(0, Math.min(255, target[1] * light * strength + g * (1 - strength)));
+      d[i + 2] = Math.max(0, Math.min(255, target[2] * light * strength + b * (1 - strength)));
+    }
+    c.putImageData(imgData, 0, 0);
+    return { img: canvas, cellW: base.cellW, cellH: base.cellH, frames: base.frames, ready: true, src: `${base.src}#skin-${skin.name}` };
+  }
   function startRun() {
     gameStarted = true;
     document.body.classList.remove('menu-open');
@@ -302,6 +350,7 @@
     restartRun();
   }
   buildSkinMenu();
+  renderSkinPreviews();
   UI.startBtn.addEventListener('pointerdown', e => { e.preventDefault(); startRun(); });
 
   function restartRun() {
@@ -680,17 +729,13 @@
     ctx.restore();
   }
   function drawSpriteLike(state, frame, s, isPlayer) {
-    const sheet = isPlayer ? playerSheetForState(state) : spriteAssets.enemyWoman;
+    const sheet = isPlayer ? sheetForSkin(playerSheetForState(state)) : spriteAssets.enemyWoman;
     if (sheet.ready) {
       if (isPlayer) {
         const idx = Math.floor(frame) % sheet.frames;
         const outW = sheet.cellW * s;
         const outH = sheet.cellH * s;
-        const skin = SKINS[selectedSkin] || SKINS[0];
-        ctx.save();
-        ctx.filter = skin.filter;
         drawAtlasFrame(sheet, idx, -outW / 2, 20 * s - outH, outW, outH);
-        ctx.restore();
       } else {
         drawEnemyGridFrame(sheet, state, frame, s);
       }
