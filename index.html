@@ -248,7 +248,7 @@
     const phoneCount = Math.min(5 + level - 1, 18);
     const enemyCount = Math.min(1 + Math.floor((level - 1) / 2), 8);
     for (let i=0;i<phoneCount;i++) {
-      const pt = spawnPoint(i + 2, 90);
+      const pt = spawnPoint(i + 2, 90, 17, 220);
       phones.push({ x: pt.x, y: pt.y, r: 13, got: false, pulse: (i * .73) % 10 });
     }
     for (let i=0;i<enemyCount;i++) enemies.push(makeEnemy(i));
@@ -258,23 +258,56 @@
   }
 
   function makeEnemy(i) {
-    const pt = spawnPoint(i + 30, 120);
+    const pt = spawnPoint(i + 30, 120, 26, 260);
     const maxHp = 70 + level * 12;
     return { id: i, x: pt.x, y: pt.y, r: 22, speed: 104 + level * 5 + i * 4, maxHp, hp: maxHp, facing: pt.x < player.x ? 1 : -1, state: 'stalk', frame: 0, animT: i * .37, stun: 0, atk: 0, dead: false, respawnTimer: 0, hitFlash: 0 };
   }
 
   function respawnEnemy(e) {
-    const pt = spawnPoint(e.id + 30 + defeatedEnemies * 3, 140);
+    const pt = spawnPoint(e.id + 30 + defeatedEnemies * 3, 140, 26, 260);
     const maxHp = 70 + level * 12;
     Object.assign(e, { x: pt.x, y: pt.y, maxHp, hp: maxHp, speed: 104 + level * 5 + e.id * 4, facing: pt.x < player.x ? 1 : -1, state: 'stalk', frame: 0, animT: 0, stun: .35, atk: 0, dead: false, respawnTimer: 0, hitFlash: 0 });
     burst(e.x, e.y, '#8be8ff', 16);
   }
 
-  function spawnPoint(i, margin = 80) {
-    const x = margin + ((i * 397 + level * 131) % Math.max(1, world.w - margin * 2));
-    const y = margin + ((i * 223 + level * 179) % Math.max(1, world.h - margin * 2));
-    if (Math.hypot(x - player.x, y - player.y) < 260) return { x: world.w - x, y: world.h - y };
-    return { x, y };
+  function spawnPoint(i, margin = 80, radius = 18, playerClearance = 260) {
+    const spanX = Math.max(1, world.w - margin * 2);
+    const spanY = Math.max(1, world.h - margin * 2);
+    let fallback = null;
+    for (let attempt = 0; attempt < 96; attempt++) {
+      const seed = i + attempt * 17;
+      const x = margin + ((seed * 397 + level * 131 + attempt * 73) % spanX);
+      const y = margin + ((seed * 223 + level * 179 + attempt * 109) % spanY);
+      const candidate = Math.hypot(x - player.x, y - player.y) < playerClearance
+        ? { x: world.w - x, y: world.h - y }
+        : { x, y };
+      candidate.x = clamp(candidate.x, margin, world.w - margin);
+      candidate.y = clamp(candidate.y, margin, world.h - margin);
+      if (!fallback && isCircleClear(candidate.x, candidate.y, radius)) fallback = candidate;
+      if (isCircleClear(candidate.x, candidate.y, radius + 12) && Math.hypot(candidate.x - player.x, candidate.y - player.y) >= playerClearance) return candidate;
+    }
+    return fallback || nearestOpenPoint(margin, radius);
+  }
+  function isCircleClear(x, y, r) {
+    if (x < r || y < r || x > world.w - r || y > world.h - r) return false;
+    for (const o of obstacles) {
+      const nx = clamp(x, o.x, o.x + o.w), ny = clamp(y, o.y, o.y + o.h);
+      const dx = x - nx, dy = y - ny;
+      if (dx * dx + dy * dy < r * r) return false;
+    }
+    return true;
+  }
+  function nearestOpenPoint(margin, radius) {
+    for (let ring = 0; ring < 12; ring++) {
+      for (let y = margin; y <= world.h - margin; y += 48) {
+        for (let x = margin; x <= world.w - margin; x += 48) {
+          const px = clamp(x + (ring % 3) * 13, margin, world.w - margin);
+          const py = clamp(y + Math.floor(ring / 3) * 11, margin, world.h - margin);
+          if (isCircleClear(px, py, radius + 12) && Math.hypot(px - player.x, py - player.y) > 180) return { x: px, y: py };
+        }
+      }
+    }
+    return { x: player.x + 180, y: player.y + 120 };
   }
 
   function advanceLevel() {
