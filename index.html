@@ -29,12 +29,12 @@
     }
     #game { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; image-rendering: pixelated; }
     .hud {
-      position: fixed; inset: env(safe-area-inset-top) 0 auto 0; pointer-events: none; padding: 12px 14px;
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; text-shadow: 0 2px 4px #000;
+      position: fixed; inset: calc(10px + env(safe-area-inset-top)) auto auto 12px; pointer-events: none;
+      color: #fff3b7; font: 900 18px/1 "Courier New", ui-monospace, monospace; letter-spacing: .08em;
+      text-shadow: 2px 0 #13080d, -2px 0 #13080d, 0 2px #13080d, 0 -2px #13080d, 3px 3px 0 #000;
+      image-rendering: pixelated;
     }
-    .hud-card { min-width: 128px; padding: 10px 12px; background: linear-gradient(180deg, rgba(20,18,29,.74), rgba(6,5,11,.48)); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.35); backdrop-filter: blur(8px); }
-    .brand { font-weight: 900; letter-spacing: .08em; font-size: 12px; color: #fff; }
-    .sub { margin-top: 3px; opacity: .78; font-size: 11px; line-height: 1.25; }
+    .phone-counter { padding: 0; }
     .controls { position: fixed; inset: auto 0 calc(14px + env(safe-area-inset-bottom)) 0; pointer-events: none; }
     .stick-zone { pointer-events: auto; position: absolute; left: 16px; bottom: 0; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.08), rgba(255,255,255,.025)); border: 1px solid var(--line); box-shadow: inset 0 0 0 2px rgba(255,255,255,.03); touch-action: none; }
     .stick { position: absolute; left: 50%; top: 50%; width: 62px; height: 62px; margin: -31px 0 0 -31px; border-radius: 50%; background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.38), rgba(180,190,205,.16) 42%, rgba(20,22,29,.75)); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 10px 28px rgba(0,0,0,.45); }
@@ -48,12 +48,7 @@
 </head>
 <body>
   <canvas id="game"></canvas>
-  <div class="hud">
-    <div class="hud-card">
-      <div class="brand">NIGHT STALKER</div>
-      <div class="sub" id="status">Find phones. Avoid the hunter.</div>
-    </div>
-  </div>
+  <div class="hud"><div class="phone-counter" id="status">0/5 📱</div></div>
   <div class="controls">
     <div class="stick-zone" id="stickZone"><div class="stick" id="stick"></div></div>
     <div class="buttons">
@@ -230,7 +225,6 @@
       phones.push({ x: pt.x, y: pt.y, r: 13, got: false, pulse: (i * .73) % 10 });
     }
     for (let i=0;i<enemyCount;i++) enemies.push(makeEnemy(i));
-    UI.status.textContent = `${currentMap().name}: collect ${phones.length} phones. Avoid the hunters.`;
     updateUI();
   }
 
@@ -290,7 +284,6 @@
   function advanceLevel() {
     level++;
     player.combo += 5;
-    UI.status.textContent = `${currentMap().name} cleared. Warping to the next map.`;
     burst(player.x, player.y, '#8be8ff', 34);
     initLevel(false);
   }
@@ -304,7 +297,6 @@
     stick.style.transform = 'translate(0px,0px)';
     shake = Math.max(shake, 14);
     burst(player.x, player.y, '#d92036', 26);
-    UI.status.textContent = 'Caught. Restarting in 3...';
   }
 
   function resize() {
@@ -369,7 +361,7 @@
 
     for (const ph of phones) if (!ph.got) {
       ph.pulse += dt;
-      if (dist(player, ph) < player.r + ph.r + 8) { ph.got = true; player.combo++; burst(ph.x, ph.y, '#dfefff', 18); UI.status.textContent = 'Phone found. Keep moving.'; }
+      if (dist(player, ph) < player.r + ph.r + 8) { ph.got = true; player.combo++; burst(ph.x, ph.y, '#dfefff', 18); }
     }
 
     updateEnemies(dt);
@@ -393,11 +385,11 @@
       e.state = e.stun > 0 ? 'hurt' : e.atk > 0 ? 'attack' : seen ? 'run' : 'walk';
       if (l < e.r + player.r + 8 && player.inv <= 0) {
         player.hp = Math.max(0, player.hp - Math.min(22, 11 + level)); player.inv = .85; e.atk = .4; shake = 10; burst(player.x, player.y, '#d92036', 14);
-        if (player.hp <= 0) triggerGameOver(); else UI.status.textContent = 'A hunter hit you!';
+        if (player.hp <= 0) triggerGameOver();
       }
       if (player.atk > .12 && Math.abs(player.x + player.facing*36 - e.x) < 58 && Math.abs(player.y - e.y) < 50) {
         e.hp = Math.max(0, e.hp - 26); e.stun = .65; e.hitFlash = .18; shake = Math.max(shake, 7); burst(e.x, e.y, '#d92036', 9); player.combo++;
-        if (e.hp <= 0) { e.dead = true; e.respawnTimer = Math.max(2.2, 4.2 - level * .12); defeatedEnemies++; burst(e.x, e.y, '#dfefff', 18); UI.status.textContent = `Hunter defeated. Respawning in ${e.respawnTimer.toFixed(1)}s.`; }
+        if (e.hp <= 0) { e.dead = true; e.respawnTimer = Math.max(2.2, 4.2 - level * .12); defeatedEnemies++; burst(e.x, e.y, '#dfefff', 18); }
       }
     }
   }
@@ -423,7 +415,8 @@
   function burst(x,y,color,n) { for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*160,vy:(Math.random()-.5)*160-20,life:.35+Math.random()*.45,color,size:2+Math.random()*4}); }
   function updateParticles(dt) { for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=180*dt; if(p.life<=0) particles.splice(i,1); } }
   function updateUI() {
-    if (phones.every(p=>p.got) && levelClearTimer > 0) UI.status.textContent = `Level ${level} clear! Next wave incoming...`;
+    const collected = phones.filter(p => p.got).length;
+    UI.status.textContent = `${collected}/${phones.length} 📱`;
   }
 
   function updateGameOver(dt) {
@@ -432,8 +425,6 @@
     animate(player, dt);
     for (const e of enemies) animate(e, dt);
     shake = Math.max(0, shake - dt * 18);
-    const seconds = Math.ceil(gameOverTimer);
-    UI.status.textContent = seconds > 0 ? `Caught. Restarting in ${seconds}...` : 'Restarting...';
     updateUI();
     if (gameOverTimer <= 0) restartRun();
   }
