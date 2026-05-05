@@ -167,6 +167,10 @@
   let audioUnlocked = false;
   let audioMuted = false;
   let currentMusic = null;
+  let currentMusicName = null;
+  let musicMode = 'menu';
+  let lastMusicCheck = 0;
+  let lastMusicSwitch = 0;
   let selectedSkin = 0;
 
   const SKINS = [
@@ -208,6 +212,7 @@
   function unlockAudio() {
     if (audioUnlocked) return;
     audioUnlocked = true;
+    Object.values(MUSIC).forEach(audio => audio.load());
     updateMusic();
   }
   function playMusic(name) {
@@ -216,11 +221,11 @@
     if (!next || currentMusic === next) return;
     if (currentMusic) currentMusic.pause();
     currentMusic = next;
-    currentMusic.currentTime = 0;
+    currentMusicName = name;
     currentMusic.play().catch(() => {});
   }
   function pauseMusic() { if (currentMusic) currentMusic.pause(); }
-  function stopMusic() { if (currentMusic) { currentMusic.pause(); currentMusic.currentTime = 0; } currentMusic = null; }
+  function stopMusic() { if (currentMusic) { currentMusic.pause(); currentMusic.currentTime = 0; } currentMusic = null; currentMusicName = null; }
   function playSting(name) {
     if (!audioUnlocked || audioMuted) return;
     const sting = MUSIC[name];
@@ -240,7 +245,19 @@
     if (!gameStarted) { playMusic('menu'); return; }
     if (gamePaused) { pauseMusic(); return; }
     if (player.hp <= 0) return;
-    playMusic(nearestEnemyDistance() < 310 ? 'chase' : 'gameplay');
+    const now = performance.now();
+    if (now - lastMusicCheck < 250 && currentMusicName) return;
+    lastMusicCheck = now;
+    const nearest = nearestEnemyDistance();
+    let nextMode = musicMode;
+    if (musicMode !== 'chase' && nearest < 260) nextMode = 'chase';
+    if (musicMode === 'chase' && nearest > 420) nextMode = 'gameplay';
+    if (nextMode !== musicMode && now - lastMusicSwitch < 1400) nextMode = musicMode;
+    if (nextMode !== musicMode) {
+      musicMode = nextMode;
+      lastMusicSwitch = now;
+    }
+    playMusic(musicMode);
   }
   function toggleMute() {
     unlockAudio();
@@ -439,6 +456,9 @@
     unlockAudio();
     gameStarted = true;
     gamePaused = false;
+    musicMode = 'gameplay';
+    lastMusicCheck = 0;
+    lastMusicSwitch = performance.now();
     document.body.classList.remove('menu-open', 'paused');
     UI.startMenu.classList.add('hidden');
     UI.pauseMenu.classList.add('hidden');
@@ -455,6 +475,9 @@
   function restartToMainMenu() {
     gameStarted = false;
     gamePaused = false;
+    musicMode = 'menu';
+    lastMusicCheck = 0;
+    lastMusicSwitch = performance.now();
     document.body.classList.add('menu-open');
     document.body.classList.remove('paused');
     UI.pauseMenu.classList.add('hidden');
