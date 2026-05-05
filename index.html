@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icons/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icons/favicon-32.png" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <title>Ghostface Mobile Prototype</title>
+  <title>Ghostface</title>
   <style>
     :root {
       --bg: #07060b;
@@ -35,9 +35,6 @@
     .hud-card { min-width: 128px; padding: 10px 12px; background: linear-gradient(180deg, rgba(20,18,29,.74), rgba(6,5,11,.48)); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.35); backdrop-filter: blur(8px); }
     .brand { font-weight: 900; letter-spacing: .08em; font-size: 12px; color: #fff; }
     .sub { margin-top: 3px; opacity: .78; font-size: 11px; line-height: 1.25; }
-    .bar { width: 132px; height: 9px; border-radius: 999px; background: rgba(255,255,255,.12); margin-top: 7px; overflow: hidden; border: 1px solid rgba(255,255,255,.10); }
-    .bar > i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #d92036, #ff775f); border-radius: 999px; }
-    #score { text-align: right; }
     .controls { position: fixed; inset: auto 0 calc(14px + env(safe-area-inset-bottom)) 0; pointer-events: none; }
     .stick-zone { pointer-events: auto; position: absolute; left: 16px; bottom: 0; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.08), rgba(255,255,255,.025)); border: 1px solid var(--line); box-shadow: inset 0 0 0 2px rgba(255,255,255,.03); touch-action: none; }
     .stick { position: absolute; left: 50%; top: 50%; width: 62px; height: 62px; margin: -31px 0 0 -31px; border-radius: 50%; background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.38), rgba(180,190,205,.16) 42%, rgba(20,22,29,.75)); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 10px 28px rgba(0,0,0,.45); }
@@ -46,10 +43,6 @@
     .btn:active, .btn.active { transform: scale(.96); filter: brightness(1.25); }
     #attackBtn { right: 8px; bottom: 28px; width: 96px; height: 96px; background: radial-gradient(circle at 35% 28%, #ff6b79, #bd1028 56%, #4e0611); font-size: 18px; }
     #dashBtn { left: 8px; bottom: 8px; width: 68px; height: 68px; background: radial-gradient(circle at 35% 28%, #95efff, #147a9a 58%, #073044); font-size: 12px; }
-    .hint { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 112px); transform: translateX(-50%); width: min(78vw, 360px); padding: 10px 12px; border-radius: 16px; background: rgba(6,5,10,.68); border: 1px solid var(--line); text-align: center; backdrop-filter: blur(8px); box-shadow: 0 14px 42px rgba(0,0,0,.38); pointer-events: none; transition: opacity .28s ease, visibility .28s ease; }
-    .hint h1 { margin: 0 0 4px; font-size: 16px; letter-spacing: .04em; }
-    .hint p { margin: 3px 0; opacity: .82; font-size: 11px; line-height: 1.25; }
-    .hidden { opacity: 0; visibility: hidden; }
     @media (min-width: 900px) { .stick-zone { width: 132px; height: 132px; } .buttons { transform: scale(.92); transform-origin: bottom right; } }
   </style>
 </head>
@@ -59,11 +52,6 @@
     <div class="hud-card">
       <div class="brand">NIGHT STALKER</div>
       <div class="sub" id="status">Find phones. Avoid the hunter.</div>
-      <div class="bar"><i id="hpBar"></i></div>
-    </div>
-    <div class="hud-card" id="score">
-      <div class="brand">LEVEL <span id="level">1</span> · <span id="found">0</span>/<span id="total">5</span> PHONES</div>
-      <div class="sub"><span id="mapName">BACKROOMS</span> · Time <span id="timer">00:00</span> · Combo <span id="combo">0</span> · Enemies <span id="enemyCount">1</span> · Defeated <span id="defeatedCount">0</span></div>
     </div>
   </div>
   <div class="controls">
@@ -72,11 +60,6 @@
       <div class="btn" id="dashBtn">DASH</div>
       <div class="btn" id="attackBtn">SLASH</div>
     </div>
-  </div>
-  <div class="hint" id="hint">
-    <h1>Prototype Ready</h1>
-    <p>Mobile: drag left joystick, tap SLASH, tap DASH.</p>
-    <p>Desktop: WASD/Arrows, Space attack, Shift dash.</p>
   </div>
 <script>
 (() => {
@@ -90,17 +73,12 @@
   let last = performance.now();
   let elapsed = 0;
   let shake = 0;
-  let pausedHintTimer = 1.8;
   let gameOverTimer = 0;
   let level = 1;
   let levelClearTimer = 0;
   let defeatedEnemies = 0;
 
-  const UI = {
-    hp: document.getElementById('hpBar'), found: document.getElementById('found'), total: document.getElementById('total'),
-    timer: document.getElementById('timer'), combo: document.getElementById('combo'), status: document.getElementById('status'), hint: document.getElementById('hint'),
-    level: document.getElementById('level'), mapName: document.getElementById('mapName'), enemyCount: document.getElementById('enemyCount'), defeatedCount: document.getElementById('defeatedCount')
-  };
+  const UI = { status: document.getElementById('status') };
 
   const keys = new Set();
   const input = { x: 0, y: 0, attack: false, dash: false, attackQueued: false, dashQueued: false };
@@ -252,7 +230,6 @@
       phones.push({ x: pt.x, y: pt.y, r: 13, got: false, pulse: (i * .73) % 10 });
     }
     for (let i=0;i<enemyCount;i++) enemies.push(makeEnemy(i));
-    UI.total.textContent = phones.length;
     UI.status.textContent = `${currentMap().name}: collect ${phones.length} phones. Avoid the hunters.`;
     updateUI();
   }
@@ -342,14 +319,14 @@
   addEventListener('resize', resize, { passive: true }); resize(); restartRun();
 
   function bindButton(el, prop, queued) {
-    const down = e => { e.preventDefault(); input[prop] = true; input[queued] = true; el.classList.add('active'); hideHint(); };
+    const down = e => { e.preventDefault(); input[prop] = true; input[queued] = true; el.classList.add('active'); };
     const up = e => { e.preventDefault(); input[prop] = false; el.classList.remove('active'); };
     el.addEventListener('pointerdown', down);
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('pointerleave', up);
   }
   bindButton(attackBtn, 'attack', 'attackQueued'); bindButton(dashBtn, 'dash', 'dashQueued');
 
-  stickZone.addEventListener('pointerdown', e => { stickPointer = e.pointerId; stickZone.setPointerCapture(stickPointer); updateStick(e); hideHint(); });
+  stickZone.addEventListener('pointerdown', e => { stickPointer = e.pointerId; stickZone.setPointerCapture(stickPointer); updateStick(e); });
   stickZone.addEventListener('pointermove', e => { if (e.pointerId === stickPointer) updateStick(e); });
   function releaseStick(e) { if (e.pointerId !== stickPointer) return; stickPointer = null; input.x = input.y = 0; stick.style.transform = 'translate(0px,0px)'; }
   stickZone.addEventListener('pointerup', releaseStick); stickZone.addEventListener('pointercancel', releaseStick);
@@ -361,7 +338,7 @@
     input.x = dx / max; input.y = dy / max;
   }
 
-  addEventListener('keydown', e => { keys.add(e.code); hideHint(); if (e.code === 'Space') input.attackQueued = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.dashQueued = true; });
+  addEventListener('keydown', e => { keys.add(e.code); if (e.code === 'Space') input.attackQueued = true; if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') input.dashQueued = true; });
   addEventListener('keyup', e => keys.delete(e.code));
   function keyboardVector() {
     let x = 0, y = 0;
@@ -372,10 +349,8 @@
     const l = Math.hypot(x,y) || 1;
     return { x: x/l, y: y/l };
   }
-  function hideHint() { pausedHintTimer = Math.min(pausedHintTimer, 1.2); }
-
   function update(dt) {
-    elapsed += dt; pausedHintTimer -= dt; UI.hint.classList.toggle('hidden', pausedHintTimer <= 0);
+    elapsed += dt;
     const kv = keyboardVector();
     let ix = Math.abs(input.x) > .05 || Math.abs(input.y) > .05 ? input.x : kv.x;
     let iy = Math.abs(input.x) > .05 || Math.abs(input.y) > .05 ? input.y : kv.y;
@@ -448,8 +423,6 @@
   function burst(x,y,color,n) { for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-.5)*160,vy:(Math.random()-.5)*160-20,life:.35+Math.random()*.45,color,size:2+Math.random()*4}); }
   function updateParticles(dt) { for (let i=particles.length-1;i>=0;i--) { const p=particles[i]; p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=180*dt; if(p.life<=0) particles.splice(i,1); } }
   function updateUI() {
-    UI.hp.style.width = player.hp + '%'; UI.found.textContent = phones.filter(p=>p.got).length; UI.combo.textContent = player.combo; UI.level.textContent = level; UI.mapName.textContent = currentMap().name; UI.enemyCount.textContent = enemies.filter(e=>!e.dead).length; UI.defeatedCount.textContent = defeatedEnemies;
-    const t = Math.floor(elapsed); UI.timer.textContent = String(Math.floor(t/60)).padStart(2,'0') + ':' + String(t%60).padStart(2,'0');
     if (phones.every(p=>p.got) && levelClearTimer > 0) UI.status.textContent = `Level ${level} clear! Next wave incoming...`;
   }
 
@@ -476,7 +449,7 @@
     camera.x = clamp(player.x - W/(2*scale), 0, world.w - W/scale); camera.y = clamp(player.y - H/(2*scale), 0, world.h - H/scale);
     ctx.save(); ctx.clearRect(0,0,W,H); ctx.fillStyle = '#07060b'; ctx.fillRect(0,0,W,H);
     ctx.translate(sx, sy); ctx.scale(scale, scale); ctx.translate(-camera.x, -camera.y);
-    drawWorld(); drawPhones(); for (const e of enemies) if (!e.dead) { drawEntity(e, false); drawEnemyHealthBar(e); } drawEntity(player, true); drawParticles(); ctx.restore(); drawVignette(); if (player.hp <= 0) drawGameOverOverlay();
+    drawWorld(); drawPhones(); for (const e of enemies) if (!e.dead) { drawEntity(e, false); drawEnemyHealthBar(e); } drawEntity(player, true); drawPlayerHealthBar(); drawParticles(); ctx.restore(); drawVignette(); if (player.hp <= 0) drawGameOverOverlay();
   }
   function drawWorld() {
     const map = currentMap();
@@ -590,6 +563,16 @@
     ctx.fillStyle = '#271017'; ctx.fillRect(x, y, w, h);
     ctx.fillStyle = pct > .55 ? '#d92036' : pct > .25 ? '#ff9f43' : '#8be8ff'; ctx.fillRect(x, y, w * pct, h);
     ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.strokeRect(x+.5, y+.5, w-1, h-1);
+    ctx.restore();
+  }
+  function drawPlayerHealthBar() {
+    const pct = clamp(player.hp / 100, 0, 1);
+    const w = 56, h = 7, x = player.x - w / 2, y = player.y - 88;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,.74)'; roundRect(x - 3, y - 3, w + 6, h + 6, 4, true);
+    ctx.fillStyle = '#241018'; ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = pct > .55 ? '#38e06f' : pct > .25 ? '#ffb14a' : '#d92036'; ctx.fillRect(x, y, w * pct, h);
+    ctx.strokeStyle = 'rgba(255,255,255,.38)'; ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
     ctx.restore();
   }
   function drawSpriteLike(state, frame, s, isPlayer) {
