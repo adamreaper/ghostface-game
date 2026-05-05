@@ -107,7 +107,8 @@
       clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
     }
     .pause-btn:active { transform: translate(2px, 2px); filter: brightness(1.25); }
-    body.menu-open .pause-btn, body.paused .controls { opacity: 0; pointer-events: none; }
+    .sound-btn { right: 68px; font-size: 16px; }
+    body.menu-open #pauseBtn, body.paused .controls { opacity: 0; pointer-events: none; }
     .pause-actions { display: grid; gap: 10px; margin-top: 16px; }
     .pause-actions .start-btn { margin-top: 0; }
     @media (max-width: 520px) { .menu-title { font-size: 27px; } .skin-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .skin-option { min-height: 104px; } }
@@ -116,6 +117,7 @@
 <body class="menu-open">
   <canvas id="game"></canvas>
   <div class="hud"><div class="phone-counter" id="status"><span id="phoneCount">0/5</span><span class="phone-icon" aria-label="phone"></span></div></div>
+  <button class="pause-btn sound-btn" id="soundBtn" type="button" aria-label="Toggle music">♪</button>
   <button class="pause-btn" id="pauseBtn" type="button" aria-label="Pause">Ⅱ</button>
   <div class="controls">
     <div class="stick-zone" id="stickZone"><div class="stick" id="stick"></div></div>
@@ -161,6 +163,10 @@
   let defeatedEnemies = 0;
   let gameStarted = false;
   let gamePaused = false;
+  let gameOverSounded = false;
+  let audioUnlocked = false;
+  let audioMuted = false;
+  let currentMusic = null;
   let selectedSkin = 0;
 
   const SKINS = [
@@ -180,9 +186,68 @@
     skinGrid: document.getElementById('skinGrid'),
     startBtn: document.getElementById('startBtn'),
     pauseBtn: document.getElementById('pauseBtn'),
+    soundBtn: document.getElementById('soundBtn'),
     resumeBtn: document.getElementById('resumeBtn'),
     restartMenuBtn: document.getElementById('restartMenuBtn')
   };
+
+  function makeAudio(src, volume, loop = true) {
+    const audio = new Audio(src);
+    audio.loop = loop;
+    audio.preload = 'auto';
+    audio.volume = volume;
+    return audio;
+  }
+  const MUSIC = {
+    menu: makeAudio('assets/audio/menu_loop.ogg', .36, true),
+    gameplay: makeAudio('assets/audio/gameplay_loop.ogg', .34, true),
+    chase: makeAudio('assets/audio/chase_loop.ogg', .42, true),
+    gameover: makeAudio('assets/audio/gameover_sting.ogg', .55, false)
+  };
+
+  function unlockAudio() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    updateMusic();
+  }
+  function playMusic(name) {
+    if (!audioUnlocked || audioMuted) return;
+    const next = MUSIC[name];
+    if (!next || currentMusic === next) return;
+    if (currentMusic) currentMusic.pause();
+    currentMusic = next;
+    currentMusic.currentTime = 0;
+    currentMusic.play().catch(() => {});
+  }
+  function pauseMusic() { if (currentMusic) currentMusic.pause(); }
+  function stopMusic() { if (currentMusic) { currentMusic.pause(); currentMusic.currentTime = 0; } currentMusic = null; }
+  function playSting(name) {
+    if (!audioUnlocked || audioMuted) return;
+    const sting = MUSIC[name];
+    if (!sting) return;
+    sting.currentTime = 0;
+    sting.play().catch(() => {});
+  }
+  function nearestEnemyDistance() {
+    let nearest = Infinity;
+    for (const e of enemies) if (!e.dead) nearest = Math.min(nearest, dist(player, e));
+    return nearest;
+  }
+  function updateMusic() {
+    if (!audioUnlocked) return;
+    UI.soundBtn.textContent = audioMuted ? '×' : '♪';
+    if (audioMuted) { pauseMusic(); return; }
+    if (!gameStarted) { playMusic('menu'); return; }
+    if (gamePaused) { pauseMusic(); return; }
+    if (player.hp <= 0) return;
+    playMusic(nearestEnemyDistance() < 310 ? 'chase' : 'gameplay');
+  }
+  function toggleMute() {
+    unlockAudio();
+    audioMuted = !audioMuted;
+    if (audioMuted) pauseMusic();
+    updateMusic();
+  }
 
   const keys = new Set();
   const input = { x: 0, y: 0, attack: false, dash: false, attackQueued: false, dashQueued: false };
@@ -371,18 +436,21 @@
     return { img: canvas, cellW: base.cellW, cellH: base.cellH, frames: base.frames, ready: true, src: `${base.src}#skin-${skin.name}` };
   }
   function startRun() {
+    unlockAudio();
     gameStarted = true;
     gamePaused = false;
     document.body.classList.remove('menu-open', 'paused');
     UI.startMenu.classList.add('hidden');
     UI.pauseMenu.classList.add('hidden');
     restartRun();
+    updateMusic();
   }
   function setPaused(paused) {
     if (!gameStarted || player.hp <= 0) return;
     gamePaused = paused;
     document.body.classList.toggle('paused', gamePaused);
     UI.pauseMenu.classList.toggle('hidden', !gamePaused);
+    updateMusic();
   }
   function restartToMainMenu() {
     gameStarted = false;
@@ -396,19 +464,23 @@
     stick.style.transform = 'translate(0px,0px)';
     restartRun();
     renderSkinPreviews();
+    updateMusic();
   }
   buildSkinMenu();
   renderSkinPreviews();
   UI.startBtn.addEventListener('pointerdown', e => { e.preventDefault(); startRun(); });
-  UI.pauseBtn.addEventListener('pointerdown', e => { e.preventDefault(); setPaused(true); });
+  UI.soundBtn.addEventListener('pointerdown', e => { e.preventDefault(); toggleMute(); });
+  UI.pauseBtn.addEventListener('pointerdown', e => { e.preventDefault(); unlockAudio(); setPaused(true); });
   UI.resumeBtn.addEventListener('pointerdown', e => { e.preventDefault(); setPaused(false); });
   UI.restartMenuBtn.addEventListener('pointerdown', e => { e.preventDefault(); restartToMainMenu(); });
+  addEventListener('pointerdown', unlockAudio, { once: true, passive: true });
 
   function restartRun() {
     level = 1;
     elapsed = 0;
     player.combo = 0;
     defeatedEnemies = 0;
+    gameOverSounded = false;
     initLevel(true);
   }
 
@@ -505,6 +577,7 @@
     stick.style.transform = 'translate(0px,0px)';
     shake = Math.max(shake, 14);
     burst(player.x, player.y, '#d92036', 26);
+    if (!gameOverSounded) { gameOverSounded = true; stopMusic(); playSting('gameover'); }
   }
 
   function resize() {
@@ -539,6 +612,8 @@
   }
 
   addEventListener('keydown', e => {
+    unlockAudio();
+    if (e.code === 'KeyM') { e.preventDefault(); toggleMute(); return; }
     if (!gameStarted && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); startRun(); return; }
     if (gameStarted && e.code === 'Escape') { e.preventDefault(); setPaused(!gamePaused); return; }
     if (gamePaused) return;
@@ -652,6 +727,7 @@
       elapsed += dt;
       animate(player, dt);
     }
+    updateMusic();
     render(); requestAnimationFrame(draw);
   }
 
