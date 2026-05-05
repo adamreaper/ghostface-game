@@ -192,8 +192,15 @@
           }
         }
         rowAnchors.push(found
-          ? { centerX: (minX + maxX + 1) / 2, bottom: maxY + 1 }
-          : { centerX: srcW / 2, bottom: srcH });
+          ? {
+              centerX: (minX + maxX + 1) / 2,
+              bottom: maxY + 1,
+              cropX: minX,
+              cropY: minY,
+              cropW: maxX - minX + 1,
+              cropH: maxY - minY + 1
+            }
+          : { centerX: srcW / 2, bottom: srcH, cropX: 0, cropY: 0, cropW: srcW, cropH: srcH });
       }
       anchors.push(rowAnchors);
     }
@@ -523,22 +530,26 @@
     const seq = enemySheetFramesForState(state);
     const col = seq[Math.floor(frame) % seq.length];
     const cell = sheet.cells?.[row]?.[col] || { srcX: col * sheet.cellW, srcY: row * sheet.cellH, srcW: sheet.cellW, srcH: sheet.cellH };
-    const outW = cell.srcW * s;
-    const outH = cell.srcH * s;
-    const anchor = sheet.anchors?.[row]?.[col] || { centerX: cell.srcW / 2, bottom: cell.srcH };
+    const anchor = sheet.anchors?.[row]?.[col] || { centerX: cell.srcW / 2, bottom: cell.srcH, cropX: 0, cropY: 0, cropW: cell.srcW, cropH: cell.srcH };
+    // Draw only the measured opaque crop. Drawing the whole cell preserves
+    // leftover sheet artifacts/neighbor fragments even when the pivot is stable.
+    const cropX = anchor.cropX ?? 0;
+    const cropY = anchor.cropY ?? 0;
+    const cropW = anchor.cropW ?? cell.srcW;
+    const cropH = anchor.cropH ?? cell.srcH;
     const baselineY = 16 * s;
-    const drawX = -anchor.centerX * s;
-    const drawY = baselineY - anchor.bottom * s;
+    const drawX = -(anchor.centerX - cropX) * s;
+    const drawY = baselineY - (anchor.bottom - cropY) * s;
     ctx.drawImage(
       sheet.img,
-      cell.srcX,
-      cell.srcY,
-      cell.srcW,
-      cell.srcH,
+      cell.srcX + cropX,
+      cell.srcY + cropY,
+      cropW,
+      cropH,
       Math.round(drawX),
       Math.round(drawY),
-      Math.round(outW),
-      Math.round(outH)
+      Math.round(cropW * s),
+      Math.round(cropH * s)
     );
   }
   function drawAtlasFrame(sheet, frame, dx, dy, dw, dh) {
