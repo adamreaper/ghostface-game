@@ -131,19 +131,38 @@
 
   function loadGridSprite(src, cols, rows) {
     const img = new Image();
-    const sheet = { img, cols, rows, ready: false, anchors: [] };
+    const sheet = { img, cols, rows, ready: false, frames: cols, anchors: [], cells: [] };
     img.onload = () => {
       sheet.ready = true;
-      sheet.cellW = img.width / cols;
-      sheet.cellH = img.height / rows;
-      sheet.frames = cols;
-      sheet.anchors = computeGridAnchors(img, cols, rows, sheet.cellW, sheet.cellH);
+      // The enemy sheet is 1024x1024 over a 6x6 grid, so each logical cell is
+      // 170.666px. Using fractional source rectangles makes the browser sample
+      // between cells, which reads as glitching/bleeding during animation. Use
+      // rounded integer cell edges for BOTH measuring and drawing.
+      sheet.cells = computeGridCells(img, cols, rows);
+      sheet.cellW = sheet.cells[0]?.[0]?.srcW || img.width / cols;
+      sheet.cellH = sheet.cells[0]?.[0]?.srcH || img.height / rows;
+      sheet.anchors = computeGridAnchors(img, sheet.cells);
     };
     img.src = src;
     return sheet;
   }
 
-  function computeGridAnchors(img, cols, rows, cellW, cellH) {
+  function computeGridCells(img, cols, rows) {
+    const xEdges = Array.from({ length: cols + 1 }, (_, i) => Math.round(i * img.width / cols));
+    const yEdges = Array.from({ length: rows + 1 }, (_, i) => Math.round(i * img.height / rows));
+    const cells = [];
+    for (let row = 0; row < rows; row++) {
+      const rowCells = [];
+      for (let col = 0; col < cols; col++) {
+        const srcX = xEdges[col], srcY = yEdges[row];
+        rowCells.push({ srcX, srcY, srcW: xEdges[col + 1] - srcX, srcH: yEdges[row + 1] - srcY });
+      }
+      cells.push(rowCells);
+    }
+    return cells;
+  }
+
+  function computeGridAnchors(img, cells) {
     const canvas = document.createElement('canvas');
     canvas.width = img.width;
     canvas.height = img.height;
@@ -151,21 +170,20 @@
     c.drawImage(img, 0, 0);
     const { data, width } = c.getImageData(0, 0, img.width, img.height);
     const anchors = [];
-    const xEdges = Array.from({ length: cols + 1 }, (_, i) => Math.round(i * img.width / cols));
-    const yEdges = Array.from({ length: rows + 1 }, (_, i) => Math.round(i * img.height / rows));
 
-    for (let row = 0; row < rows; row++) {
+    for (let row = 0; row < cells.length; row++) {
       const rowAnchors = [];
-      for (let col = 0; col < cols; col++) {
-        const left = xEdges[col], right = xEdges[col + 1];
-        const top = yEdges[row], bottom = yEdges[row + 1];
-        let minX = right - left, maxX = 0, minY = bottom - top, maxY = 0, found = false;
-        for (let y = top; y < bottom; y++) {
-          for (let x = left; x < right; x++) {
-            if (data[(y * width + x) * 4 + 3] > 0) {
+      for (let col = 0; col < cells[row].length; col++) {
+        const { srcX, srcY, srcW, srcH } = cells[row][col];
+        let minX = srcW, maxX = 0, minY = srcH, maxY = 0, found = false;
+        for (let y = srcY; y < srcY + srcH; y++) {
+          for (let x = srcX; x < srcX + srcW; x++) {
+            // Ignore almost-transparent edge noise; otherwise invisible fringe
+            // pixels become the anchor and make the character snap around.
+            if (data[(y * width + x) * 4 + 3] > 16) {
               found = true;
-              const rx = x - left;
-              const ry = y - top;
+              const rx = x - srcX;
+              const ry = y - srcY;
               if (rx < minX) minX = rx;
               if (rx > maxX) maxX = rx;
               if (ry < minY) minY = ry;
@@ -175,7 +193,7 @@
         }
         rowAnchors.push(found
           ? { centerX: (minX + maxX + 1) / 2, bottom: maxY + 1 }
-          : { centerX: cellW / 2, bottom: cellH });
+          : { centerX: srcW / 2, bottom: srcH });
       }
       anchors.push(rowAnchors);
     }
@@ -501,18 +519,19 @@
     const row = enemySheetRowForState(state);
     const seq = enemySheetFramesForState(state);
     const col = seq[Math.floor(frame) % seq.length];
-    const outW = sheet.cellW * s;
-    const outH = sheet.cellH * s;
-    const anchor = sheet.anchors?.[row]?.[col] || { centerX: sheet.cellW / 2, bottom: sheet.cellH };
+    const cell = sheet.cells?.[row]?.[col] || { srcX: col * sheet.cellW, srcY: row * sheet.cellH, srcW: sheet.cellW, srcH: sheet.cellH };
+    const outW = cell.srcW * s;
+    const outH = cell.srcH * s;
+    const anchor = sheet.anchors?.[row]?.[col] || { centerX: cell.srcW / 2, bottom: cell.srcH };
     const baselineY = 16 * s;
     const drawX = -anchor.centerX * s;
     const drawY = baselineY - anchor.bottom * s;
     ctx.drawImage(
       sheet.img,
-      col * sheet.cellW,
-      row * sheet.cellH,
-      sheet.cellW,
-      sheet.cellH,
+      cell.srcX,
+      cell.srcY,
+      cell.srcW,
+      cell.srcH,
       Math.round(drawX),
       Math.round(drawY),
       Math.round(outW),
